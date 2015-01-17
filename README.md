@@ -54,8 +54,6 @@ function love.textinput(text)
 end
 ```
 
-## Introduction
-
 ## Creating a Button
 
 This creates a button object at position (10, 10) with width/height (90, 90):
@@ -64,7 +62,7 @@ This creates a button object at position (10, 10) with width/height (90, 90):
 button = UI.Button(10, 10, 90, 90)
 ```
 
-This object can then be updated via button:update(dt) and it will automatically have its attributes changed as the user hovers, selects or presses it. However, calling button:draw() won't do anything because by default all UI elements don't have a draw function defined. To do that:
+This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. However, calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined. To do that:
 
 ```lua
 button.draw = function(button)
@@ -86,7 +84,7 @@ The rest of this page will focus on describing each UI element and its attribute
 
 ## Elements
 
-## Board
+### Board
 
 An element that can contain other elements.
 
