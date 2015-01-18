@@ -54,7 +54,13 @@ function love.textinput(text)
 end
 ```
 
-## Creating a Button
+## Table of Contents
+
+* [Creating an element](#Creating an element)
+* [Elements](#Elements)
+  * [Board](#Board)
+
+## Creating an element
 
 This creates a button object at position (10, 10) with width/height (90, 90):
 
