@@ -57,12 +57,13 @@ end
 ## Table of Contents
 
 * [Creating an element](#creating-an-element)
+* [Binding actions](#binding-actions)
 * [Elements](#elements)
   * [Board](#board)
 
 ## Creating an element
 
-This creates a button object at position (10, 10) with width/height (90, 90):
+For this example we'll a button object at position (10, 10) with width/height (90, 90):
 
 ```lua
 button = UI.Button(10, 10, 90, 90)
@@ -82,16 +83,67 @@ button.draw = function(button)
 end
 ```
 
-Simply define the button's draw function and use its attributes to change how the button looks. In this example I draw the button normally as a rectangle with the color (64, 64, 64). Then, on top of that, if the button is down (pressed and being held) I draw a rectangle of a slightly darker color (32, 32, 32), to give visual feedback that the button is changed somehow.
-
-In any case, for all UI elements created with this module you'll have to do this and specify their draw functions. A big problem with UI modules for games is that they need to have really high customizability, because games can look very different from each other and so can their UIs. So a simple way to do this is to abstract away what can be abstracted away (the logic behind each UI element), and to just provide the user with all the information he needs to then draw those elements. 
-
-The rest of this page will focus on describing each UI element and its attributes.
+Define the button's draw function and use its attributes to change how the button looks. For all UI elements created with this module you'll have to specify their draw functions (or use an already made [theme](#themes) if you need something quick). A big problem with UI modules for games is that they need to have really high customizability, because games can look very different from each other and so can their UIs. So a simple way to do this is to abstract away what can be abstracted away (the logic behind each UI element), and to just provide the user with all the information he needs to then draw those elements. 
 
 ## Elements
+
+All elements currently implemented are described here, along with their creation methods and attributes.
 
 ### Board
 
 An element that can contain other elements.
 
+#### Methods
 
+---
+
+**new(x, y, w, h, settings):** creation method for a board. `x, y, w, h` are obligatory, while the settings table contains optional attributes such as `.draggable`or `.resizable`.
+
+---
+
+**addElement(element):** adds an element to the board. The added object will be drawn with its position relative to the board, meaning that its `.x, .y` attributes must not be global, but in relation to how far away they are from the board's `.x, .y` (top-left corner) attributes. For instance:
+
+```lua
+board = UI.Board(100, 100, 50, 50)
+board:addElement(UI.Button(5, 5, 40, 40))
+```
+
+In this example the button will be drawn at position `(105, 105)`.
+
+---
+
+**bind(key, action):** binds a key to an action. Available actions are:
+
+* `'left-click'`:
+* `'focus-next'`: jumps to the next element in the board to focus on (set that element's `.selected` attribute to true), defaults to the `TAB` key
+* `'focus-previous'`: jumps to the previous element in the board to focus on (set that element's `.selected` attribute to true), defaults to the `Q` key
+
+---
+
+#### Attributes
+
+---
+
+**x, y:** top-left corner position
+
+---
+
+**w, h:** width and height
+
+---
+
+**draggable (boolean):** if the board is draggable or not. Draggable boards will be dragged if the user clicks and holds the button bound to the action `'left-click'` while hovering a part of the board that isn't covered by another element.
+
+---
+
+**elements (table):** the table holding all added elements
+
+---
+
+**resizable (boolean):** if the board is resizable or not. Resizable boards will be resized if the user clicks and holds the button bound to the action `'left-click'` while hovering the board's resize margin.
+
+---
+
+**resize_margin_size:** the number of pixels from the outer border of the board where resizing can happen
+
+---
