@@ -97,7 +97,11 @@ An element that can contain other elements.
 
 ---
 
-**new(x, y, w, h, settings):** creation method for a board. `x, y, w, h` are obligatory, while the settings table contains optional attributes such as `.draggable`or `.resizable`.
+**new(x, y, w, h, settings):** creation method for a board. `x, y, w, h` are obligatory, while the settings table contains optional attributes such as `.draggable`or `.resizable`. Example:
+
+```lua
+board = UI.Board(0, 0, 100, 100, {draggable = true, resizable = true, resize_margin_size = 10})
+```
 
 ---
 
@@ -114,9 +118,9 @@ In this example the button will be drawn at position `(105, 105)`.
 
 **bind(key, action):** binds a key to an action. Available actions are:
 
-* `'left-click'`:
-* `'focus-next'`: jumps to the next element in the board to focus on (set that element's `.selected` attribute to true), defaults to the `TAB` key
-* `'focus-previous'`: jumps to the previous element in the board to focus on (set that element's `.selected` attribute to true), defaults to the `Q` key
+* `'left-click'`
+* `'focus-next':` jumps to the next element in the board to focus on (set that element's `.selected` attribute to true), defaults to the `TAB` key
+* `'focus-previous':` jumps to the previous element in the board to focus on, defaults to the `SHIFT + <focus-next>` keys
 
 ---
 
@@ -144,6 +148,6 @@ In this example the button will be drawn at position `(105, 105)`.
 
 ---
 
-**resize_margin_size:** the number of pixels from the outer border of the board where resizing can happen
+**resize_margin_size:** the number of pixels from the outer border of the board where resizing can happen. If `.resizable` is set then this value defaults to `10` if omitted on the settings table.
 
 ---
