@@ -56,9 +56,9 @@ end
 
 ## Table of Contents
 
-* [Creating an element](#Creating an element)
-* [Elements](#Elements)
-  * [Board](#Board)
+* [Creating an element](#creating-an-element)
+* [Elements](#elements)
+  * [Board](#board)
 
 ## Creating an element
 
