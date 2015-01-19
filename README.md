@@ -83,7 +83,7 @@ button.draw = function(button)
 end
 ```
 
-Define the button's draw function and use its attributes to change how the button looks. For all UI elements created with this module you'll have to specify their draw functions (or use an already made [theme](#themes) if you need something quick). A big problem with UI modules for games is that they need to have really high customizability, because games can look very different from each other and so can their UIs. So a simple way to do this is to abstract away what can be abstracted away (the logic behind each UI element), and to just provide the user with all the information he needs to then draw those elements. 
+Define the button's draw function and use its attributes to change how the button looks. For all UI elements created with this module you'll have to specify their draw functions (or use an already made [theme](#themes) if you need something quick).
 
 ## Elements
 
