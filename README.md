@@ -104,6 +104,8 @@ An element that can contain other elements.
 board = UI.Board(0, 0, 100, 100, {draggable = true})
 ```
 
+---
+
 **`addElement(element):`** adds an element to the board. The added object will be drawn with its position relative to the board, meaning that its `.x, .y` attributes must not be global, but in relation to how far away they are from the board's `.x, .y` (top-left corner) attributes. For instance:
 
 ```lua
@@ -112,6 +114,8 @@ board:addElement(UI.Button(5, 5, 40, 40))
 ```
 
 In this example the button will be drawn at position `(105, 105)`.
+
+---
 
 **`bind(key, action):`** binds a key to an action. Available actions are:
 
