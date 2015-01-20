@@ -56,38 +56,37 @@ end
 
 ## Table of Contents
 
-* [Creating an element](#creating-an-element)
-* [Binding actions](#binding-actions)
+* [Introduction](#introduction)
 * [Elements](#elements)
   * [Board](#board)
 
-## Creating an element
+## Introduction
 
-For this example we'll a button object at position (10, 10) with width/height (90, 90):
+For this example we'll create a button object at position (10, 10) with width/height (90, 90):
 
 ```lua
 button = UI.Button(10, 10, 90, 90)
 ```
 
-This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. However, calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined. To do that:
+This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined. To do that:
 
 ```lua
-button.draw = function(button)
+button.draw = function(self)
   love.graphics.setColor(64, 64, 64)
-  love.graphics.rectangle('fill', button.x, button.y, button.w, button.h)
-  if button.down then
+  love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+  if self.down then
     love.graphics.setColor(32, 32, 32)
-    love.graphics.rectangle('fill', button.x, button.y, button.w, button.h)
+    love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
   end
   love.graphics.setColor(255, 255, 255)
 end
 ```
 
-Define the button's draw function and use its attributes to change how the button looks. For all UI elements created with this module you'll have to specify their draw functions (or use an already made [theme](#themes) if you need something quick).
+Define the button's draw function and use its attributes to change how the button looks. All UI elements created with this module need to have their draw functions specified explicitly because this module's job only deals with handling an UI element's logic. For user convenience a few [themes](#themes) were created to test things out though.
 
 ## Elements
 
-All elements currently implemented are described here, along with their creation methods and attributes.
+All elements currently implemented are described here, along with their methods and attributes. More elements that are to be expected in an UI module will be implemented as time goes on.
 
 ### Board
 
@@ -97,10 +96,10 @@ An element that can contain other elements.
 
 ---
 
-**new(x, y, w, h, settings):** creation method for a board. `x, y, w, h` are obligatory, while the settings table contains optional attributes such as `.draggable`or `.resizable`. Example:
+**new(x, y, w, h, settings):** creation method for a board. `x, y, w, h` are obligatory, while the settings table contains optional attributes.
 
 ```lua
-board = UI.Board(0, 0, 100, 100, {draggable = true, resizable = true, resize_margin_size = 10})
+board = UI.Board(0, 0, 100, 100, {draggable = true})
 ```
 
 ---
@@ -118,9 +117,8 @@ In this example the button will be drawn at position `(105, 105)`.
 
 **bind(key, action):** binds a key to an action. Available actions are:
 
-* `'left-click'`
-* `'focus-next':` jumps to the next element in the board to focus on (set that element's `.selected` attribute to true), defaults to the `TAB` key
-* `'focus-previous':` jumps to the previous element in the board to focus on, defaults to the `SHIFT + <focus-next>` keys
+* `'focus-next':` jumps to the next element to focus on (set that element's `.selected` attribute to true), defaults to the `TAB` key
+* `'focus-previous':` jumps to the previous element to focus on, defaults to the `SHIFT + <focus-next>` keys
 
 ---
 
