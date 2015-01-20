@@ -96,7 +96,7 @@ An element that can contain other elements.
 
 ---
 
-**new(x, y, w, h, settings):** creation method for a board. `x, y, w, h` are obligatory, while the settings table contains optional attributes.
+**`new(x, y, w, h, settings):`** creation method for a board. `x, y, w, h` are obligatory, while the settings table contains optional attributes.
 
 ```lua
 board = UI.Board(0, 0, 100, 100, {draggable = true})
@@ -104,7 +104,7 @@ board = UI.Board(0, 0, 100, 100, {draggable = true})
 
 ---
 
-**addElement(element):** adds an element to the board. The added object will be drawn with its position relative to the board, meaning that its `.x, .y` attributes must not be global, but in relation to how far away they are from the board's `.x, .y` (top-left corner) attributes. For instance:
+**`addElement(element):`** adds an element to the board. The added object will be drawn with its position relative to the board, meaning that its `.x, .y` attributes must not be global, but in relation to how far away they are from the board's `.x, .y` (top-left corner) attributes. For instance:
 
 ```lua
 board = UI.Board(100, 100, 50, 50)
@@ -115,10 +115,11 @@ In this example the button will be drawn at position `(105, 105)`.
 
 ---
 
-**bind(key, action):** binds a key to an action. Available actions are:
+**`bind(key, action):`** binds a key to an action. Available actions are:
 
-* `'focus-next':` jumps to the next element to focus on, defaults to the `TAB` key
-* `'focus-previous':` jumps to the previous element to focus on, defaults to the `SHIFT + <focus-next>` keys
+* `'left-click':` left click, defaults to `MOUSE1`
+* `'focus-next':` jumps to the next element to focus on, defaults to `TAB`
+* `'previous-modifier':` key to be held down when pressing `<focus-next>` to focus on previous element, defaults to `LSHIFT`
 
 ---
 
@@ -126,26 +127,26 @@ In this example the button will be drawn at position `(105, 105)`.
 
 ---
 
-**x, y:** top-left corner position
+**`x, y:`** top-left corner position
 
 ---
 
-**w, h:** width and height
+**`w, h:`** width and height
 
 ---
 
-**draggable (boolean):** if the board is draggable or not. Draggable boards will be dragged if the user clicks and holds the button bound to the action `'left-click'` while hovering a part of the board that isn't covered by another element.
+**`draggable (boolean):`** if the board is draggable or not. Draggable boards will be dragged if the user clicks and holds the button bound to the action `'left-click'` while hovering a part of the board that isn't covered by another element.
 
 ---
 
-**elements (table):** the table holding all added elements
+**`elements (table):`** the table holding all added elements
 
 ---
 
-**resizable (boolean):** if the board is resizable or not. Resizable boards will be resized if the user clicks and holds the button bound to the action `'left-click'` while hovering the board's resize margin.
+**`resizable (boolean):`** if the board is resizable or not. Resizable boards will be resized if the user clicks and holds the button bound to the action `'left-click'` while hovering the board's resize margin.
 
 ---
 
-**resize_margin_size:** the number of pixels from the outer border of the board where resizing can happen. If `.resizable` is set then this value defaults to `10` if omitted on the settings table.
+**`resize_margin_size:`** the number of pixels from the outer border of the board where resizing can happen. If `.resizable` is set then this value defaults to `5` if omitted on the settings table.
 
 ---
