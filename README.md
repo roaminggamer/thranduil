@@ -117,7 +117,7 @@ In this example the button will be drawn at position `(105, 105)`.
 
 **bind(key, action):** binds a key to an action. Available actions are:
 
-* `'focus-next':` jumps to the next element to focus on (set that element's `.selected` attribute to true), defaults to the `TAB` key
+* `'focus-next':` jumps to the next element to focus on, defaults to the `TAB` key
 * `'focus-previous':` jumps to the previous element to focus on, defaults to the `SHIFT + <focus-next>` keys
 
 ---
