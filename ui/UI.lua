@@ -62,7 +62,7 @@ UI.Input = require(ui_path .. 'Input/Input')
 
 local Button = require(ui_path .. 'Button')
 UI.Button = function(...) return Button(UI, ...) end
-local Element = require(ui_path .. 'Element')
-UI.Element = function(...) return Element(UI, ...) end
+local Frame = require(ui_path .. 'Frame')
+UI.Frame = function(...) return Frame(UI, ...) end
 
 return UI

@@ -1,18 +1,21 @@
 UI = require 'ui/UI'
+FlatUI = require 'ui/themes/FlatUI'
 
 function love.load()
-    love.window.setMode(800, 600, {display = 2})
-    element = UI.Element(0, 0, 100, 100)
+    love.window.setMode(800, 600, {display = 1})
+    frame = UI.Frame(0, 0, 100, 100, {draggable = true, resizable = true})
+    frame:addElement(UI.Button(5, 25, 70, 30))
+    frame:addElement(UI.Button(5, 60, 70, 30))
 end
 
 function love.update(dt)
-    element:update(dt)
+    frame:update(dt)
 
     UI.update(dt)
 end
 
 function love.draw()
-    element:draw()
+    frame:draw()
 end
 
 function love.keypressed(key)

@@ -7,74 +7,104 @@ function Button.new(ui, x, y, w, h, settings)
     self.ui = ui
     self.id = self.ui.addToElementsList(self)
 
+    self.ix, self.iy = x, y
     self.x, self.y = x, y
     self.w, self.h = w, h
     local settings = settings or {}
     for k, v in pairs(settings) do self[k] = v end
 
     self.input = self.ui.Input()
-    self.input:bind('return', 'key_enter')
-    self.input:bind('mouse1', 'left_click')
+    self.input:bind('return', 'key-enter')
+    self.input:bind('mouse1', 'left-click')
 
     self.hot = false -- true if the mouse is over the object (inside its x, y, w, h rectangle)
-    self.selected = true -- true if currently selected with TAB (for instance) so it can be pressed with a key
+    self.selected = false -- true if currently selected with TAB (for instance) so it can be pressed with a key
     self.down = false -- true if currently being pressed
-    self.pressed = false -- true on the frame it has been pressed, false otherwise
-    self.released = false -- true on the frame it has been released, false otherwise
+    self.pressed = false -- true on the frame it has been pressed
+    self.released = false -- true on the frame it has been released
+    self.enter = false -- true on the frame the mouse has entered the frame
+    self.exit = false -- true on the frame the mouse has exited the frame
+
+    self.pressing = false
+    self.previous_hot = false
 
     return setmetatable(self, Button)
 end
 
-function Button:update(dt)
-    -- Check for hot
+function Button:update(dt, parent)
     local x, y = love.mouse.getPosition()
+    self.x, self.y = parent.x + self.ix, parent.y + self.iy
+
+    -- Check for hot
     if x >= self.x and x <= self.x + self.w and y >= self.y and y <= self.y + self.h then
         self.hot = true
     else self.hot = false end
 
+    -- Check for enter 
+    if self.hot and not self.previous_hot then
+        self.enter = true
+    else self.enter = false end
+
+    -- Check for exit
+    if not self.hot and self.previous_hot then
+        self.exit = true
+    else self.exit = false end
+
     -- Check for pressed/released/down on mouse hover
-    if self.hot then
-        if self.input:pressed('left_click') then
-            self.pressed = true
-        end
-        if self.input:released('left_click') then
-            self.released = true
-        end
-        if self.input:down('left_click') then
-            self.down = true
-        end
+    if self.hot and self.input:pressed('left-click') then
+        self.pressed = true
+        self.pressing = true
+    end
+    if self.pressing and self.input:down('left-click') then
+        self.down = true
+    end
+    if self.pressing and self.input:released('left-click') then
+        self.released = true
+        self.pressing = false
+        self.down = false
     end
 
     -- Check for pressed/released/down on key press
-    if self.selected then
-        if self.input:pressed('key_enter') then
-            self.pressed = true
-        end
-        if self.input:released('key_enter') then
-            self.released = true
-        end
-        if self.input:down('key_enter') then
-            self.down = true
-        end
+    if self.selected and self.input:pressed('key-enter') then
+        self.pressed = true
+        self.pressing = true
     end
-
-    -- Undo previous frame's pressed/released/down
-    if not self.input:pressed('left_click') and not self.input:pressed('key_enter') then
-        self.pressed = false
+    if self.pressing and self.input:down('key-enter') then
+        self.down = true
     end
-    if self.input:released('left_click') and self.down then
+    if self.pressing and self.input:released('key-enter') then
         self.released = true
-    end
-    if not self.input:released('left_click') and not self.input:released('key_enter') then
-        self.released = false
-    end
-    if not self.input:down('left_click') and not self.input:down('key_enter') then
+        self.pressing = false
         self.down = false
     end
+
+    if self.pressed and self.previous_pressed then self.pressed = false end
+    if self.released and self.previous_released then self.released = false end
+
+    -- Set previous frame state
+    self.previous_hot = self.hot
+    self.previous_pressed = self.pressed
+    self.previous_released = self.released
 end
 
-function Button:draw()
+function Button:draw(parent)
+    love.graphics.setColor(32, 32, 32)
+    love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
 
+    if self.hot then
+        love.graphics.setColor(48, 48, 48)
+        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+    end
+
+    if self.selected then
+        love.graphics.setColor(48, 48, 64)
+        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+    end
+
+    if self.down then
+        love.graphics.setColor(16, 16, 16)
+        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+    end
 end
 
 function Button:keypressed(key)
