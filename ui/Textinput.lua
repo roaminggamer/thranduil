@@ -1,15 +1,6 @@
 local Textinput = {}
 Textinput.__index = Textinput
 
-local stringJoin = function(table, index, select_index)
-    local string = ''
-    for i, c in ipairs(table) do 
-        if i == index or i == select_index then string = string .. string.char(219)
-        else string = string .. c end
-    end
-    return string
-end
-
 function Textinput.new(ui, x, y, w, h, settings)
     local self = {}
 
@@ -47,7 +38,6 @@ function Textinput.new(ui, x, y, w, h, settings)
 
     self.previous_hot = false
 
-    self.text = ''
     self.string = {}
     self.copy_buffer = {}
     self.index = 1
@@ -60,7 +50,9 @@ function Textinput.new(ui, x, y, w, h, settings)
     self.last_mouse_pressed_time = false
 
     self.font = settings.font or love.graphics.getFont()
+    self.text = ''
     self.text_margin = settings.text_margin or 5
+    self.text_x, self.text_y = self.x + self.text_margin, self.y + self.text_margin
 
     return setmetatable(self, Textinput)
 end
@@ -74,7 +66,7 @@ function Textinput:update(dt, parent)
         self.index = self.index - 1
         self.select_index = nil
         if self.index < 1 then self.index = 1 end
-        print(stringJoin(self.string, self.index, self.select_index), 'LEFT')
+        -- print(self:join(), 'LEFT')
     end
     if not self.input:down('lshift') and self.input:down('move-left') then
         local d = love.timer.getTime() - self.pressed_time
@@ -82,7 +74,7 @@ function Textinput:update(dt, parent)
             self.index = self.index - 1
             self.select_index = nil
             if self.index < 1 then self.index = 1 end
-            print(stringJoin(self.string, self.index, self.select_index), 'LEFT')
+            -- print(self:join(), 'LEFT')
         end
     end
 
@@ -92,7 +84,7 @@ function Textinput:update(dt, parent)
         self.index = self.index + 1
         self.select_index = nil
         if self.index > #self.string + 1 then self.index = #self.string + 1 end
-        print(stringJoin(self.string, self.index, self.select_index), 'RIGHT')
+        -- print(self:join(), 'RIGHT')
     end
     if not self.input:down('lshift') and self.input:down('move-right') then
         local d = love.timer.getTime() - self.pressed_time
@@ -100,7 +92,7 @@ function Textinput:update(dt, parent)
             self.index = self.index + 1
             self.select_index = nil
             if self.index > #self.string + 1 then self.index = #self.string + 1 end
-            print(stringJoin(self.string, self.index, self.select_index), 'RIGHT')
+            -- print(self:join(), 'RIGHT')
         end
     end
 
@@ -122,7 +114,7 @@ function Textinput:update(dt, parent)
         if not self.select_index then self.select_index = self.index - 1 
         else self.select_index = self.select_index - 1 end
         if self.select_index < 1 then self.select_index = 1 end
-        print(stringJoin(self.string, self.index, self.select_index), 'SHIFT + LEFT')
+        -- print(self:join(), 'SHIFT + LEFT')
     end
     if self.input:down('lshift') and self.input:down('move-left') then
         local d = love.timer.getTime() - self.pressed_time
@@ -130,7 +122,7 @@ function Textinput:update(dt, parent)
             if not self.select_index then self.select_index = self.index - 1 
             else self.select_index = self.select_index - 1 end
             if self.select_index < 1 then self.select_index = 1 end
-            print(stringJoin(self.string, self.index, self.select_index), 'SHIFT + LEFT')
+            -- print(self:join(), 'SHIFT + LEFT')
         end
     end
 
@@ -140,7 +132,7 @@ function Textinput:update(dt, parent)
         if not self.select_index then self.select_index = self.index + 1
         else self.select_index = self.select_index + 1 end
         if self.select_index > #self.string + 1 then self.select_index = #self.string + 1 end
-        print(stringJoin(self.string, self.index, self.select_index), 'SHIFT + RIGHT')
+        -- print(self:join(), 'SHIFT + RIGHT')
     end
     if self.input:down('lshift') and self.input:down('move-right') then
         local d = love.timer.getTime() - self.pressed_time
@@ -148,7 +140,7 @@ function Textinput:update(dt, parent)
             if not self.select_index then self.select_index = self.index + 1
             else self.select_index = self.select_index + 1 end
             if self.select_index > #self.string + 1 then self.select_index = #self.string + 1 end
-            print(stringJoin(self.string, self.index, self.select_index), 'SHIFT + RIGHT')
+            -- print(self:join(), 'SHIFT + RIGHT')
         end
     end
 
@@ -156,7 +148,7 @@ function Textinput:update(dt, parent)
     if self.input:down('lctrl') and self.input:pressed('all') then
         self.index = 1
         self.select_index = #self.string + 1
-        print(stringJoin(self.string, self.index, self.select_index), 'CTRL + A')
+        -- print(self:join(), 'CTRL + A')
     end
 
     -- Delete before cursor
@@ -169,7 +161,7 @@ function Textinput:update(dt, parent)
             self.index = self.index - 1
             if self.index < 1 then self.index = 1 end
         end
-        print(stringJoin(self.string, self.index, self.select_index), 'BACKSPACE')
+        -- print(self:join(), 'BACKSPACE')
     end
     if self.input:down('backspace') then
         local d = love.timer.getTime() - self.pressed_time
@@ -181,7 +173,7 @@ function Textinput:update(dt, parent)
                 self.index = self.index - 1
                 if self.index < 1 then self.index = 1 end
             end
-            print(stringJoin(self.string, self.index, self.select_index), 'BACKSPACE')
+            -- print(self:join(), 'BACKSPACE')
         end
     end
 
@@ -197,7 +189,7 @@ function Textinput:update(dt, parent)
                 if self.index < 1 then self.index = 1 end
             else table.remove(self.string, self.index) end
         end
-        print(stringJoin(self.string, self.index, self.select_index), 'DELETE')
+        -- print(self:join(), 'DELETE')
     end
     if self.input:down('delete') then
         local d = love.timer.getTime() - self.pressed_time
@@ -211,7 +203,7 @@ function Textinput:update(dt, parent)
                     if self.index < 1 then self.index = 1 end
                 else table.remove(self.string, self.index) end
             end
-            print(stringJoin(self.string, self.index, self.select_index), 'DELETE')
+            -- print(self:join(), 'DELETE')
         end
     end
 
@@ -278,8 +270,15 @@ function Textinput:update(dt, parent)
     if self.input:down('lctrl') and self.input:pressed('cut') then self:cutSelected() end
     if self.input:down('lctrl') and self.input:pressed('paste') then self:pasteCopyBuffer() end
 
+    -- Last frame state
+    self.previous_hot = self.hot
+    self.last_mouse_pressed_time = self.mouse_pressed_time
+
     -- Set text as a string
-    self.text = stringJoin(self.string)
+    self.text = ''
+    for _, c in ipairs(self.string) do self.text = self.text .. c end
+
+    -- Figure out text drawing position (text scrolling is done automatically)
 
     -- Figure out selection/cursor position in pixels
     local u, v, w
@@ -287,12 +286,9 @@ function Textinput:update(dt, parent)
     v = self.font:getWidth(self.text:utf8sub(1, self.index))
     if self.select_index then v = self.font:getWidth(self.text:utf8sub(1, self.select_index - 1)) end
     if self.index == #self.string + 1 and not self.select_index then v = v + self.font:getWidth('a') end
-    self.selection_position = {x = self.x + u + self.text_margin, y = self.y + self.text_margin}
+    self.selection_position = {x = self.text_x + u, y = self.text_y}
     self.selection_size = {w = v - u, h = self.font:getHeight()}
 
-    -- Last frame
-    self.previous_hot = self.hot
-    self.last_mouse_pressed_time = self.mouse_pressed_time
 end
 
 function Textinput:draw(parent)
@@ -304,13 +300,16 @@ function Textinput:draw(parent)
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
     end
 
+    love.graphics.setScissor(self.x, self.y, self.w - self.text_margin, self.h)
+
     love.graphics.setColor(128, 128, 128)
-    love.graphics.print(self.text, self.x + self.text_margin, self.y + self.text_margin)
+    love.graphics.print(self.text, self.text_x, self.text_y)
 
     love.graphics.setColor(192, 192, 192, 64)
     love.graphics.rectangle('fill', self.selection_position.x, self.selection_position.y, self.selection_size.w, self.selection_size.h)
 
     love.graphics.setColor(255, 255, 255, 255)
+    love.graphics.setScissor()
 end
 
 function Textinput:keypressed(key)
@@ -350,7 +349,7 @@ function Textinput:textinput(text)
     self:deleteSelected()
     table.insert(self.string, self.index, text)
     self.index = self.index + 1
-    print(stringJoin(self.string, self.index, self.select_index), text)
+    -- print(self:join(), text)
 end
 
 function Textinput:destroy()
@@ -362,13 +361,13 @@ function Textinput:pasteCopyBuffer()
         table.insert(self.string, self.index, c)
         self.index = self.index + 1
     end
-    print(stringJoin(self.string, self.index, self.select_index), 'CTRL + P: ' .. stringJoin(self.copy_buffer))
+    -- print(self:join(), 'CTRL + P: ' .. self:join(self.copy_buffer))
 end
 
 function Textinput:cutSelected()
     self:copySelected()
     self:deleteSelected()
-    print(stringJoin(self.string, self.index, self.select_index), 'CTRL + X: ' .. stringJoin(self.copy_buffer))
+    -- print(self:join(), 'CTRL + X: ' .. self:join(self.copy_buffer))
 end
 
 function Textinput:copySelected()
@@ -382,7 +381,7 @@ function Textinput:copySelected()
             table.insert(self.copy_buffer, self.string[i])
         end
     end
-    print(stringJoin(self.string, self.index, self.select_index), 'CTRL + C: ' .. stringJoin(self.copy_buffer))
+    -- print(self:join(), 'CTRL + C: ' .. self:join(self.copy_buffer))
 end
 
 function Textinput:deleteSelected()
@@ -397,6 +396,16 @@ function Textinput:deleteSelected()
         self.index = min
         self.select_index = nil
     end
+end
+
+function Textinput:join(table)
+    local table = table or self.string
+    local string = ''
+    for i, c in ipairs(table) do 
+        if i == self.index or i == self.select_index then string = string .. string.char(219)
+        else string = string .. c end
+    end
+    return string
 end
 
 return setmetatable({new = new}, {__call = function(_, ...) return Textinput.new(...) end})
