@@ -6,16 +6,20 @@ function love.load()
     frame = UI.Frame(0, 0, 100, 100, {draggable = true, resizable = true})
     frame:addElement(UI.Button(5, 25, 70, 30))
     frame:addElement(UI.Button(5, 60, 70, 30))
+
+    textinput = UI.Textinput(100, 100, 100, 100)
 end
 
 function love.update(dt)
     frame:update(dt)
+    textinput:update(dt)
 
     UI.update(dt)
 end
 
 function love.draw()
     frame:draw()
+    textinput:draw()
 end
 
 function love.keypressed(key)

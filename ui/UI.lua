@@ -1,5 +1,6 @@
 local ui_path = tostring(...):sub(1, -3)
 local UI = {}
+require(ui_path .. 'utf8')
 
 UI.update = function(dt) 
     for _, t in ipairs(UI.elements) do
@@ -64,5 +65,7 @@ local Button = require(ui_path .. 'Button')
 UI.Button = function(...) return Button(UI, ...) end
 local Frame = require(ui_path .. 'Frame')
 UI.Frame = function(...) return Frame(UI, ...) end
+local Textinput = require(ui_path .. 'Textinput')
+UI.Textinput = function(...) return Textinput(UI, ...) end
 
 return UI
