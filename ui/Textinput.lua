@@ -53,6 +53,7 @@ function Textinput.new(ui, x, y, w, h, settings)
     self.text = ''
     self.text_margin = settings.text_margin or 5
     self.text_x, self.text_y = self.x + self.text_margin, self.y + self.text_margin
+    self.text_ix, self.text_iy = self.x + self.text_margin, self.y + self.text_margin
 
     return setmetatable(self, Textinput)
 end
@@ -230,7 +231,7 @@ function Textinput:update(dt, parent)
         self.mouse_all_selected = false
         self.mouse_pressing = true
         for i = 0, #self.string + 1 do
-            local _x, _y = self.x + self.text_margin + self.font:getWidth(self.text:utf8sub(1, i)), self.y + self.text_margin
+            local _x, _y = self.text_x + self.font:getWidth(self.text:utf8sub(1, i)), self.y + self.text_margin
             local w, h = self.font:getWidth(self.text:utf8sub(i, i)), self.font:getHeight()
             if i == 0 then w, h = self.font:getWidth(self.text:utf8sub(1, 1)), self.font:getHeight() end
             if x >= _x and x <= _x + w and y >= _y and y <= _y + h then
@@ -240,7 +241,7 @@ function Textinput:update(dt, parent)
     end
     if not self.mouse_all_selected and self.mouse_pressing and self.input:down('left-click') then
         for i = 0, #self.string + 1 do
-            local _x, _y = self.x + self.text_margin + self.font:getWidth(self.text:utf8sub(1, i)), self.y + self.text_margin
+            local _x, _y = self.text_x + self.font:getWidth(self.text:utf8sub(1, i)), self.y + self.text_margin
             local w, h = self.font:getWidth(self.text:utf8sub(i, i)), self.font:getHeight()
             if i == 0 then w, h = self.font:getWidth(self.text:utf8sub(1, 1)), self.font:getHeight() end
             if x >= _x and x <= _x + w and y >= _y and y <= _y + h then
@@ -278,8 +279,6 @@ function Textinput:update(dt, parent)
     self.text = ''
     for _, c in ipairs(self.string) do self.text = self.text .. c end
 
-    -- Figure out text drawing position (text scrolling is done automatically)
-
     -- Figure out selection/cursor position in pixels
     local u, v, w
     u = self.font:getWidth(self.text:utf8sub(1, self.index - 1))
@@ -289,9 +288,46 @@ function Textinput:update(dt, parent)
     self.selection_position = {x = self.text_x + u, y = self.text_y}
     self.selection_size = {w = v - u, h = self.font:getHeight()}
 
+    -- Figure out text drawing position (text scrolling is done automatically)
+    local points = {}
+    local x1, y1 = self.selection_position.x, self.selection_position.y
+    local x2, y2 = self.selection_position.x + self.selection_size.w, self.selection_position.y + self.selection_size.h
+
+    -- Scroll left, select index first
+    if x2 < self.x + self.text_margin then
+        local dx = (self.x + self.text_margin) - x2
+        self.text_x = self.text_x + dx
+    end
+
+    -- Scroll right, select index first
+    if x2 > self.x + self.w - self.text_margin then
+        local dx = x2 - (self.x + self.w - self.text_margin)
+        self.text_x = self.text_x - dx
+    end
+
+    if not self.select_index then
+        -- Scroll left, index
+        if x1 < self.x + self.text_margin then
+            local dx = (self.x + self.text_margin) - x1
+            self.text_x = self.text_x + dx
+        end
+
+        -- Scroll right, index
+        if x1 > self.x + self.w - self.text_margin then
+            local dx = x1 - (self.x + self.w - self.text_margin)
+            self.text_x = self.text_x - dx
+        end
+    end
+
+    -- No scroll if the text fits
+    if self.font:getWidth(self.text) < self.w - 2*self.text_margin then
+        self.text_x = self.x + self.text_margin
+    end
 end
 
 function Textinput:draw(parent)
+    love.graphics.setFont(self.font)
+
     love.graphics.setColor(32, 32, 32)
     love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
 
@@ -309,6 +345,7 @@ function Textinput:draw(parent)
     love.graphics.rectangle('fill', self.selection_position.x, self.selection_position.y, self.selection_size.w, self.selection_size.h)
 
     love.graphics.setColor(255, 255, 255, 255)
+
     love.graphics.setScissor()
 end
 

@@ -7,7 +7,7 @@ function love.load()
     frame:addElement(UI.Button(5, 25, 70, 30))
     frame:addElement(UI.Button(5, 60, 70, 30))
 
-    textinput = UI.Textinput(100, 100, 100, 100)
+    textinput = UI.Textinput(100, 100, 500, 46, {font = love.graphics.newFont('FreePixel.ttf', 32)})
 end
 
 function love.update(dt)
