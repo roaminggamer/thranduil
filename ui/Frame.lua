@@ -16,12 +16,23 @@ function Frame.new(ui, x, y, w, h, settings)
     self.input:bind('tab', 'focus-next')
     self.input:bind('lshift', 'previous-modifier')
     self.input:bind('mouse1', 'left-click')
+    self.input:bind('escape', 'close')
 
     self.hot = false -- true if the mouse is over the object (inside its x, y, w, h rectangle)
     self.selected = false -- true if currently selected with TAB (for instance) so it can be pressed with a key
+    self.selected_enter = false
+    self.selected_exit = false
     self.down = false -- true if currently being pressed
     self.enter = false -- true on the frame the mouse has entered the frame
     self.exit = false -- true on the frame the mouse has exited the frame
+
+    self.closeable = settings.closeable or false
+    self.close_hot = false
+    self.closing = false
+    self.closed = false
+    self.close_margin = settings.close_margin or 5
+    self.close_button_width = settings.close_button_width or 10
+    self.close_button_height = settings.close_button_height or 10
 
     self.draggable = settings.draggable or false
     self.drag_hot = false
@@ -40,6 +51,7 @@ function Frame.new(ui, x, y, w, h, settings)
 
     self.previous_mouse_position = nil
     self.previous_hot = false
+    self.previous_selected = false
 
     return setmetatable(self, Frame)
 end
@@ -62,6 +74,34 @@ function Frame:update(dt)
         self.exit = true
     else self.exit = false end
 
+    -- Set focused or not
+    if self.hot and self.input:pressed('left-click') then
+        self.selected = true
+    elseif not self.hot and self.input:pressed('left-click') then
+        self.selected = false
+    end
+
+    -- Check for selected_enter
+    if self.selected and not self.previous_selected then
+        self.selected_enter = true
+    else self.selected_enter = false end
+
+    -- Check for selected_exit
+    if not self.selected and self.previous_selected then
+        self.selected_exit = true
+    else self.selected_exit = false end
+
+    if self.closeable then
+        -- Check for close_hot
+        if self.hot and 
+           x >= self.x + self.w - self.close_margin - self.close_button_width and
+           x <= self.x + self.w - self.close_margin and
+           y >= self.y + self.close_margin and
+           y <= self.y + self.close_margin + self.close_button_height then
+            self.close_hot = true
+        else self.close_hot = false end
+    end
+
     if self.draggable then
         -- Check for drag_hot
         if self.hot and x >= self.x and x <= self.x + self.w and y >= self.y and y <= self.y + self.drag_margin then
@@ -77,6 +117,18 @@ function Frame:update(dt)
            (x >= self.x and x <= self.x + self.w and y >= self.y + self.h - self.resize_margin and y <= self.y + self.h) then
             self.resize_hot = true 
         else self.resize_hot = false end
+    end
+
+    -- Close
+    if self.close_hot and self.input:pressed('left-click') then
+        self.closing = true
+    end
+    if self.close_hot and self.closing and self.input:released('left-click') then
+        self.closed = true
+        self.closing = false
+    end
+    if self.selected and self.input:pressed('close') then
+        self.closed = true
     end
 
     -- Drag
@@ -132,6 +184,7 @@ function Frame:update(dt)
 
     -- Set previous frame state
     self.previous_hot = self.hot
+    self.previous_selected = self.selected
     self.previous_mouse_position = {x = x, y = y}
 
     for _, element in ipairs(self.elements) do
@@ -140,12 +193,20 @@ function Frame:update(dt)
 end
 
 function Frame:draw()
+    if self.closed then return end
+
     love.graphics.setColor(64, 64, 64)
     love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
 
     if self.draggable then
         love.graphics.setColor(32, 32, 32)
         love.graphics.rectangle('fill', self.x, self.y, self.w, self.drag_margin)
+    end
+
+    if self.closeable then
+        love.graphics.setColor(96, 96, 96)
+        love.graphics.rectangle('fill', self.x + self.w - self.close_margin - self.close_button_width, 
+                                self.y + self.close_margin, self.close_button_width, self.close_button_height)
     end
 
     if self.hot then
@@ -161,6 +222,11 @@ function Frame:draw()
     if self.resize_hot then
         love.graphics.setColor(50, 200, 50)
         love.graphics.rectangle('fill', self.x + self.w + 5, self.y + 25, 5, 5)
+        love.graphics.setColor(255, 255, 255)
+    end
+    if self.close_hot then
+        love.graphics.setColor(240, 10, 10)
+        love.graphics.rectangle('fill', self.x + self.w + 5, self.y + 35, 5, 5)
         love.graphics.setColor(255, 255, 255)
     end
 

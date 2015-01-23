@@ -29,14 +29,14 @@ function Textinput.new(ui, x, y, w, h, settings)
     self.input:bind('a', 'all')
 
     self.hot = false -- true if the mouse is over the object (inside its x, y, w, h rectangle)
-    self.selected = true -- true if currently selected with TAB (for instance) so it can be pressed with a key
+    self.selected = false -- true if currently selected with TAB (for instance) so it can be pressed with a key
+    self.selected_enter = false
+    self.selected_exit = false
     self.down = false -- true if currently being pressed
     self.pressed = false -- true on the frame it has been pressed
     self.released = false -- true on the frame it has been released
     self.enter = false -- true on the frame the mouse has entered the frame
     self.exit = false -- true on the frame the mouse has exited the frame
-
-    self.previous_hot = false
 
     self.string = {}
     self.copy_buffer = {}
@@ -53,13 +53,48 @@ function Textinput.new(ui, x, y, w, h, settings)
     self.text = ''
     self.text_margin = settings.text_margin or 5
     self.text_x, self.text_y = self.x + self.text_margin, self.y + self.text_margin
-    self.text_ix, self.text_iy = self.x + self.text_margin, self.y + self.text_margin
+
+    self.previous_hot = false
+    self.previous_selected = false
 
     return setmetatable(self, Textinput)
 end
 
 function Textinput:update(dt, parent)
-    if not self.selected then return end
+    local x, y = love.mouse.getPosition()
+    if parent then self.x, self.y = parent.x + self.ix, parent.y + self.iy end
+
+    -- Check for hot
+    if x >= self.x and x <= self.x + self.w and y >= self.y and y <= self.y + self.h then
+        self.hot = true
+    else self.hot = false end
+
+    -- Check for enter 
+    if self.hot and not self.previous_hot then
+        self.enter = true
+    else self.enter = false end
+
+    -- Check for exit
+    if not self.hot and self.previous_hot then
+        self.exit = true
+    else self.exit = false end
+
+    -- Set focused or not
+    if self.hot and self.input:pressed('left-click') then
+        self.selected = true
+    elseif not self.hot and self.input:pressed('left-click') then
+        self.selected = false
+    end
+
+    -- Check for selected_enter
+    if self.selected and not self.previous_selected then
+        self.selected_enter = true
+    else self.selected_enter = false end
+
+    -- Check for selected_exit
+    if not self.selected and self.previous_selected then
+        self.selected_exit = true
+    else self.selected_exit = false end
 
     -- Move cursor left
     if not self.input:down('lshift') and self.input:pressed('move-left') then
@@ -208,23 +243,6 @@ function Textinput:update(dt, parent)
         end
     end
 
-    local x, y = love.mouse.getPosition()
-
-    -- Check for hot
-    if x >= self.x and x <= self.x + self.w and y >= self.y and y <= self.y + self.h then
-        self.hot = true
-    else self.hot = false end
-
-    -- Check for enter 
-    if self.hot and not self.previous_hot then
-        self.enter = true
-    else self.enter = false end
-
-    -- Check for exit
-    if not self.hot and self.previous_hot then
-        self.exit = true
-    else self.exit = false end
-
     -- Cursor selection with mouse
     if self.hot and self.input:pressed('left-click') then
         self.select_index = nil
@@ -273,6 +291,7 @@ function Textinput:update(dt, parent)
 
     -- Last frame state
     self.previous_hot = self.hot
+    self.previous_selected = self.selected
     self.last_mouse_pressed_time = self.mouse_pressed_time
 
     -- Set text as a string
@@ -342,7 +361,9 @@ function Textinput:draw(parent)
     love.graphics.print(self.text, self.text_x, self.text_y)
 
     love.graphics.setColor(192, 192, 192, 64)
-    love.graphics.rectangle('fill', self.selection_position.x, self.selection_position.y, self.selection_size.w, self.selection_size.h)
+    if self.selection_position then
+        love.graphics.rectangle('fill', self.selection_position.x, self.selection_position.y, self.selection_size.w, self.selection_size.h)
+    end
 
     love.graphics.setColor(255, 255, 255, 255)
 

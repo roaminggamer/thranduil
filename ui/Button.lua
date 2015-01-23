@@ -27,13 +27,14 @@ function Button.new(ui, x, y, w, h, settings)
 
     self.pressing = false
     self.previous_hot = false
+    self.previous_selected = false
 
     return setmetatable(self, Button)
 end
 
 function Button:update(dt, parent)
     local x, y = love.mouse.getPosition()
-    self.x, self.y = parent.x + self.ix, parent.y + self.iy
+    if parent then self.x, self.y = parent.x + self.ix, parent.y + self.iy end
 
     -- Check for hot
     if x >= self.x and x <= self.x + self.w and y >= self.y and y <= self.y + self.h then
@@ -49,6 +50,16 @@ function Button:update(dt, parent)
     if not self.hot and self.previous_hot then
         self.exit = true
     else self.exit = false end
+
+    -- Check for selected_enter
+    if self.selected and not self.previous_selected then
+        self.selected_enter = true
+    else self.selected_enter = false end
+
+    -- Check for selected_exit
+    if not self.selected and self.previous_selected then
+        self.selected_exit = true
+    else self.selected_exit = false end
 
     -- Check for pressed/released/down on mouse hover
     if self.hot and self.input:pressed('left-click') then
@@ -85,6 +96,7 @@ function Button:update(dt, parent)
     self.previous_hot = self.hot
     self.previous_pressed = self.pressed
     self.previous_released = self.released
+    self.previous_selected = self.selected
 end
 
 function Button:draw(parent)

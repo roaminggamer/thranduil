@@ -1,3 +1,0 @@
-local FlatUI = {}
-
-return FlatUI 
