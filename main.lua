@@ -12,8 +12,6 @@ end
 function love.update(dt)
     frame:update(dt)
     textinput:update(dt)
-
-    UI.update(dt)
 end
 
 function love.draw()

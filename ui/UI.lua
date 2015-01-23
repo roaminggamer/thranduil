@@ -2,11 +2,6 @@ local ui_path = tostring(...):sub(1, -3)
 local UI = {}
 require(ui_path .. 'utf8')
 
-UI.update = function(dt) 
-    for _, t in ipairs(UI.elements) do
-        t.input:update(dt)
-    end
-end
 UI.keypressed = function(key) 
     for _, t in ipairs(UI.elements) do
         t.input:keypressed(key)

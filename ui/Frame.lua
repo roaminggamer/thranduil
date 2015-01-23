@@ -27,12 +27,13 @@ function Frame.new(ui, x, y, w, h, settings)
     self.exit = false -- true on the frame the mouse has exited the frame
 
     self.closeable = settings.closeable or false
-    self.close_hot = false
     self.closing = false
-    self.closed = false
+    self.closed = settings.closed or false
     self.close_margin = settings.close_margin or 5
     self.close_button_width = settings.close_button_width or 10
     self.close_button_height = settings.close_button_height or 10
+    self.close_button = self.ui.Button(self.w - self.close_margin - self.close_button_width, self.close_margin,
+                                       self.close_button_width, self.close_button_height, {theme = self.theme})
 
     self.draggable = settings.draggable or false
     self.drag_hot = false
@@ -57,6 +58,8 @@ function Frame.new(ui, x, y, w, h, settings)
 end
 
 function Frame:update(dt)
+    if self.closed then return end
+
     local x, y = love.mouse.getPosition()
 
     -- Check for hot
@@ -91,15 +94,8 @@ function Frame:update(dt)
         self.selected_exit = true
     else self.selected_exit = false end
 
-    if self.closeable then
-        -- Check for close_hot
-        if self.hot and 
-           x >= self.x + self.w - self.close_margin - self.close_button_width and
-           x <= self.x + self.w - self.close_margin and
-           y >= self.y + self.close_margin and
-           y <= self.y + self.close_margin + self.close_button_height then
-            self.close_hot = true
-        else self.close_hot = false end
+    if self.closeable then 
+        self.close_button:update(dt, self) 
     end
 
     if self.draggable then
@@ -120,10 +116,10 @@ function Frame:update(dt)
     end
 
     -- Close
-    if self.close_hot and self.input:pressed('left-click') then
+    if self.close_button.pressed then
         self.closing = true
     end
-    if self.close_hot and self.closing and self.input:released('left-click') then
+    if self.closing and self.close_button.released then
         self.closed = true
         self.closing = false
     end
@@ -158,25 +154,53 @@ function Frame:update(dt)
 
     -- Focus on elements
     if self.currently_focused_element and not self.input:down('previous-modifier') and self.input:pressed('focus-next') then
+        for i, element in ipairs(self.elements) do 
+            if element.selected then self.currently_focused_element = i end
+            element.selected = false 
+        end
         self.currently_focused_element = self.currently_focused_element + 1
         if self.currently_focused_element > #self.elements then
             self.currently_focused_element = 1
         end
     end
     if not self.currently_focused_element and not self.input:down('previous-modifier') and self.input:pressed('focus-next') then
-        self.currently_focused_element = 1
+        for i, element in ipairs(self.elements) do 
+            if element.selected then self.currently_focused_element = i end
+            element.selected = false 
+        end
+        if self.currently_focused_element then
+            self.currently_focused_element = self.currently_focused_element + 1
+            if self.currently_focused_element > #self.elements then
+                self.currently_focused_element = 1
+            end
+        else self.currently_focused_element = 1 end
     end
     if self.currently_focused_element and self.input:down('previous-modifier') and self.input:pressed('focus-next') then
+        for i, element in ipairs(self.elements) do 
+            if element.selected then self.currently_focused_element = i end
+            element.selected = false 
+        end
         self.currently_focused_element = self.currently_focused_element - 1
         if self.currently_focused_element < 1 then
             self.currently_focused_element = #self.elements
         end
     end
     if not self.currently_focused_element and self.input:down('previous-modifier') and self.input:pressed('focus-next') then
-        self.currently_focused_element = #self.elements
+        for i, element in ipairs(self.elements) do 
+            if element.selected then self.currently_focused_element = i end
+            element.selected = false 
+        end
+        if self.currently_focused_element then
+            self.currently_focused_element = self.currently_focused_element - 1
+            if self.currently_focused_element < 1 then
+                self.currently_focused_element = #self.elements
+            end
+        else self.currently_focused_element = #self.elements end
     end
     for i, element in ipairs(self.elements) do
-        element.selected = false
+        if not element.selected or not i == self.currently_focused_element then
+            element.selected = false
+        end
         if i == self.currently_focused_element then
             element.selected = true
         end
@@ -187,85 +211,30 @@ function Frame:update(dt)
     self.previous_selected = self.selected
     self.previous_mouse_position = {x = x, y = y}
 
-    for _, element in ipairs(self.elements) do
-        element:update(dt, self)
-    end
+    for _, element in ipairs(self.elements) do element:update(dt, self) end
+
+    self.input:update(dt)
 end
 
 function Frame:draw()
     if self.closed then return end
 
-    love.graphics.setColor(64, 64, 64)
-    love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+    if self.theme then self.theme.Frame.draw(self) end
 
-    if self.draggable then
-        love.graphics.setColor(32, 32, 32)
-        love.graphics.rectangle('fill', self.x, self.y, self.w, self.drag_margin)
-    end
-
-    if self.closeable then
-        love.graphics.setColor(96, 96, 96)
-        love.graphics.rectangle('fill', self.x + self.w - self.close_margin - self.close_button_width, 
-                                self.y + self.close_margin, self.close_button_width, self.close_button_height)
-    end
-
-    if self.hot then
-        love.graphics.setColor(200, 50, 50)
-        love.graphics.rectangle('fill', self.x + self.w + 5, self.y + 5, 5, 5)
-        love.graphics.setColor(255, 255, 255)
-    end
-    if self.drag_hot then
-        love.graphics.setColor(50, 50, 200)
-        love.graphics.rectangle('fill', self.x + self.w + 5, self.y + 15, 5, 5)
-        love.graphics.setColor(255, 255, 255)
-    end
-    if self.resize_hot then
-        love.graphics.setColor(50, 200, 50)
-        love.graphics.rectangle('fill', self.x + self.w + 5, self.y + 25, 5, 5)
-        love.graphics.setColor(255, 255, 255)
-    end
-    if self.close_hot then
-        love.graphics.setColor(240, 10, 10)
-        love.graphics.rectangle('fill', self.x + self.w + 5, self.y + 35, 5, 5)
-        love.graphics.setColor(255, 255, 255)
-    end
-
-    for _, element in ipairs(self.elements) do
-        element:draw(self)
-    end
-end
-
-function Frame:keypressed(key)
-    self.input:keypressed(key)
-end
-
-function Frame:keyreleased(key)
-    self.input:keyreleased(key)
-end
-
-function Frame:mousepressed(button)
-    self.input:mousepressed(button)
-end
-
-function Frame:mousereleased(button)
-    self.input:mousereleased(button)
-end
-
-function Frame:gamepadpressed(joystick, button)
-    self.input:gamepadpressed(joystick, button)
-end
-
-function Frame:gamepadreleased(joystick, button)
-    self.input:gamepadreleased(joystick, button)
-end
-
-function Frame:gamepadaxis(joystick, axis, value)
-    self.input:gamepadaxis(joystick, axis, value)
+    if self.closeable then self.close_button:draw() end
+    for _, element in ipairs(self.elements) do element:draw() end
 end
 
 function Frame:addElement(element)
     element.parent = self
     table.insert(self.elements, element)
+    return element.id
+end
+
+function Frame:getElement(id)
+    for _, element in ipairs(self.elements) do
+        if element.id == id then return element end
+    end
 end
 
 function Frame:bind(key, action)

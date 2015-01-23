@@ -15,6 +15,7 @@ function Textinput.new(ui, x, y, w, h, settings)
 
     self.input = self.ui.Input()
     self.input:bind('mouse1', 'left-click')
+    self.input:bind('mouse2', 'right-click')
     self.input:bind('left', 'move-left')
     self.input:bind('right', 'move-right')
     self.input:bind('up', 'first')
@@ -51,8 +52,12 @@ function Textinput.new(ui, x, y, w, h, settings)
 
     self.font = settings.font or love.graphics.getFont()
     self.text = ''
+    self.text_max_length = settings.text_max_length
     self.text_margin = settings.text_margin or 5
     self.text_x, self.text_y = self.x + self.text_margin, self.y + self.text_margin
+    self.text_ix, self.text_iy = self.text_x, self.text_y
+    self.text_base_x, self.text_base_y = self.text_x, self.text_y
+    self.text_add_x = 0
 
     self.previous_hot = false
     self.previous_selected = false
@@ -62,7 +67,10 @@ end
 
 function Textinput:update(dt, parent)
     local x, y = love.mouse.getPosition()
-    if parent then self.x, self.y = parent.x + self.ix, parent.y + self.iy end
+    if parent then 
+        self.x, self.y = parent.x + self.ix, parent.y + self.iy 
+        self.text_base_x, self.text_base_y = parent.x + self.text_ix, parent.y + self.text_iy
+    end
 
     -- Check for hot
     if x >= self.x and x <= self.x + self.w and y >= self.y and y <= self.y + self.h then
@@ -84,6 +92,8 @@ function Textinput:update(dt, parent)
         self.selected = true
     elseif not self.hot and self.input:pressed('left-click') then
         self.selected = false
+    elseif not self.hot and self.input:pressed('right-click') then
+        self.selected = false
     end
 
     -- Check for selected_enter
@@ -95,6 +105,107 @@ function Textinput:update(dt, parent)
     if not self.selected and self.previous_selected then
         self.selected_exit = true
     else self.selected_exit = false end
+
+    -- Set text as a string
+    self.text = ''
+    for _, c in ipairs(self.string) do self.text = self.text .. c end
+
+    -- Figure out selection/cursor position in pixels
+    local u, v, w
+    u = self.font:getWidth(self.text:utf8sub(1, self.index - 1))
+    v = self.font:getWidth(self.text:utf8sub(1, self.index))
+    if self.select_index then v = self.font:getWidth(self.text:utf8sub(1, self.select_index - 1)) end
+    if self.index == #self.string + 1 and not self.select_index then v = v + self.font:getWidth('a') end
+    self.selection_position = {x = self.text_x + u, y = self.text_y}
+    self.selection_size = {w = v - u, h = self.font:getHeight()}
+
+    -- Figure out text drawing position (text scrolling is done automatically)
+    local points = {}
+    local x1, y1 = self.selection_position.x, self.selection_position.y
+    local x2, y2 = self.selection_position.x + self.selection_size.w, self.selection_position.y + self.selection_size.h
+
+    -- Scroll left, select index first
+    if x2 < self.x + self.text_margin then
+        local dx = (self.x + self.text_margin) - x2
+        self.text_add_x = self.text_add_x + dx
+    end
+
+    -- Scroll right, select index first
+    if x2 > self.x + self.w - self.text_margin then
+        local dx = x2 - (self.x + self.w - self.text_margin)
+        self.text_add_x = self.text_add_x - dx
+    end
+
+    if not self.select_index then
+        -- Scroll left, index
+        if x1 < self.x + self.text_margin then
+            local dx = (self.x + self.text_margin) - x1
+            self.text_add_x = self.text_add_x + dx
+        end
+
+        -- Scroll right, index
+        if x1 > self.x + self.w - self.text_margin then
+            local dx = x1 - (self.x + self.w - self.text_margin)
+            self.text_add_x = self.text_add_x - dx
+        end
+    end
+
+    self.text_x, self.text_y = self.text_base_x + self.text_add_x, self.text_base_y
+
+    -- No scroll if the text fits
+    if self.font:getWidth(self.text) < self.w - 2*self.text_margin then
+        self.text_x = self.x + self.text_margin
+    end
+
+    -- Cursor selection with mouse
+    if self.hot and self.input:pressed('left-click') then
+        self.select_index = nil
+        self.mouse_all_selected = false
+        self.mouse_pressing = true
+        for i = 0, #self.string + 1 do
+            local _x, _y = self.text_x + self.font:getWidth(self.text:utf8sub(1, i)), self.y + self.text_margin
+            local w, h = self.font:getWidth(self.text:utf8sub(i, i)), self.font:getHeight()
+            if i == 0 then w, h = self.font:getWidth(self.text:utf8sub(1, 1)), self.font:getHeight() end
+            if x >= _x and x <= _x + w and y >= _y and y <= _y + h then
+                self.index = i + 1
+            end
+        end
+    end
+    if not self.mouse_all_selected and self.mouse_pressing and self.input:down('left-click') then
+        for i = 0, #self.string + 1 do
+            local _x, _y = self.text_x + self.font:getWidth(self.text:utf8sub(1, i)), self.y + self.text_margin
+            local w, h = self.font:getWidth(self.text:utf8sub(i, i)), self.font:getHeight()
+            if i == 0 then w, h = self.font:getWidth(self.text:utf8sub(1, 1)), self.font:getHeight() end
+            if x >= _x and x <= _x + w and y >= _y and y <= _y + h then
+                self.select_index = i + 1
+            end
+            if self.index == self.select_index then self.select_index = nil end
+        end
+    end
+    if self.mouse_pressing and self.input:released('left-click') then
+        self.mouse_pressing = false
+    end
+
+    -- Cursor double click all selection
+    if self.hot and self.input:pressed('left-click') then
+        self.mouse_pressed_time = love.timer.getTime()
+        if self.last_mouse_pressed_time then
+            local d = self.mouse_pressed_time - self.last_mouse_pressed_time
+            if d < 0.3 then self.mouse_all_selected = true end
+        end
+    end
+    if self.mouse_all_selected then
+        self.index = 1
+        self.select_index = #self.string + 1
+    end
+
+    -- Last frame state
+    self.previous_hot = self.hot
+    self.previous_selected = self.selected
+
+    -- Everything up has to happen every frame if the textinput is selected or not
+    if not self.selected then return end
+    -- Everything down has to happen only if the textinput is selected
 
     -- Move cursor left
     if not self.input:down('lshift') and self.input:pressed('move-left') then
@@ -243,159 +354,17 @@ function Textinput:update(dt, parent)
         end
     end
 
-    -- Cursor selection with mouse
-    if self.hot and self.input:pressed('left-click') then
-        self.select_index = nil
-        self.mouse_all_selected = false
-        self.mouse_pressing = true
-        for i = 0, #self.string + 1 do
-            local _x, _y = self.text_x + self.font:getWidth(self.text:utf8sub(1, i)), self.y + self.text_margin
-            local w, h = self.font:getWidth(self.text:utf8sub(i, i)), self.font:getHeight()
-            if i == 0 then w, h = self.font:getWidth(self.text:utf8sub(1, 1)), self.font:getHeight() end
-            if x >= _x and x <= _x + w and y >= _y and y <= _y + h then
-                self.index = i + 1
-            end
-        end
-    end
-    if not self.mouse_all_selected and self.mouse_pressing and self.input:down('left-click') then
-        for i = 0, #self.string + 1 do
-            local _x, _y = self.text_x + self.font:getWidth(self.text:utf8sub(1, i)), self.y + self.text_margin
-            local w, h = self.font:getWidth(self.text:utf8sub(i, i)), self.font:getHeight()
-            if i == 0 then w, h = self.font:getWidth(self.text:utf8sub(1, 1)), self.font:getHeight() end
-            if x >= _x and x <= _x + w and y >= _y and y <= _y + h then
-                self.select_index = i + 1
-            end
-            if self.index == self.select_index then self.select_index = nil end
-        end
-    end
-    if self.mouse_pressing and self.input:released('left-click') then
-        self.mouse_pressing = false
-    end
-
-    -- Cursor double click all selection
-    if self.hot and self.input:pressed('left-click') then
-        self.mouse_pressed_time = love.timer.getTime()
-        if self.last_mouse_pressed_time then
-            local d = self.mouse_pressed_time - self.last_mouse_pressed_time
-            if d < 0.3 then self.mouse_all_selected = true end
-        end
-    end
-    if self.mouse_all_selected then
-        self.index = 1
-        self.select_index = #self.string + 1
-    end
-
     if self.input:down('lctrl') and self.input:pressed('copy') then self:copySelected() end
     if self.input:down('lctrl') and self.input:pressed('cut') then self:cutSelected() end
     if self.input:down('lctrl') and self.input:pressed('paste') then self:pasteCopyBuffer() end
 
-    -- Last frame state
-    self.previous_hot = self.hot
-    self.previous_selected = self.selected
     self.last_mouse_pressed_time = self.mouse_pressed_time
 
-    -- Set text as a string
-    self.text = ''
-    for _, c in ipairs(self.string) do self.text = self.text .. c end
-
-    -- Figure out selection/cursor position in pixels
-    local u, v, w
-    u = self.font:getWidth(self.text:utf8sub(1, self.index - 1))
-    v = self.font:getWidth(self.text:utf8sub(1, self.index))
-    if self.select_index then v = self.font:getWidth(self.text:utf8sub(1, self.select_index - 1)) end
-    if self.index == #self.string + 1 and not self.select_index then v = v + self.font:getWidth('a') end
-    self.selection_position = {x = self.text_x + u, y = self.text_y}
-    self.selection_size = {w = v - u, h = self.font:getHeight()}
-
-    -- Figure out text drawing position (text scrolling is done automatically)
-    local points = {}
-    local x1, y1 = self.selection_position.x, self.selection_position.y
-    local x2, y2 = self.selection_position.x + self.selection_size.w, self.selection_position.y + self.selection_size.h
-
-    -- Scroll left, select index first
-    if x2 < self.x + self.text_margin then
-        local dx = (self.x + self.text_margin) - x2
-        self.text_x = self.text_x + dx
-    end
-
-    -- Scroll right, select index first
-    if x2 > self.x + self.w - self.text_margin then
-        local dx = x2 - (self.x + self.w - self.text_margin)
-        self.text_x = self.text_x - dx
-    end
-
-    if not self.select_index then
-        -- Scroll left, index
-        if x1 < self.x + self.text_margin then
-            local dx = (self.x + self.text_margin) - x1
-            self.text_x = self.text_x + dx
-        end
-
-        -- Scroll right, index
-        if x1 > self.x + self.w - self.text_margin then
-            local dx = x1 - (self.x + self.w - self.text_margin)
-            self.text_x = self.text_x - dx
-        end
-    end
-
-    -- No scroll if the text fits
-    if self.font:getWidth(self.text) < self.w - 2*self.text_margin then
-        self.text_x = self.x + self.text_margin
-    end
+    self.input:update(dt)
 end
 
 function Textinput:draw(parent)
-    love.graphics.setFont(self.font)
-
-    love.graphics.setColor(32, 32, 32)
-    love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-
-    if self.hot then
-        love.graphics.setColor(64, 64, 64)
-        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-    end
-
-    love.graphics.setScissor(self.x, self.y, self.w - self.text_margin, self.h)
-
-    love.graphics.setColor(128, 128, 128)
-    love.graphics.print(self.text, self.text_x, self.text_y)
-
-    love.graphics.setColor(192, 192, 192, 64)
-    if self.selection_position then
-        love.graphics.rectangle('fill', self.selection_position.x, self.selection_position.y, self.selection_size.w, self.selection_size.h)
-    end
-
-    love.graphics.setColor(255, 255, 255, 255)
-
-    love.graphics.setScissor()
-end
-
-function Textinput:keypressed(key)
-    self.input:keypressed(key)
-end
-
-function Textinput:keyreleased(key)
-    self.input:keyreleased(key)
-end
-
-function Textinput:mousepressed(button)
-    self.input:mousepressed(button)
-end
-
-function Textinput:mousereleased(button)
-    self.input:mousereleased(button)
-end
-
-function Textinput:gamepadpressed(joystick, button)
-    self.input:gamepadpressed(joystick, button)   
-end
-
-function Textinput:gamepadreleased(joystick, button)
-    self.input:gamepadreleased(joystick, button)
-end
-
-function Textinput:gamepadaxis(joystick, axis, value)
-    self.input:gamepadaxis(joystick, axis, value)
+    if self.theme then self.theme.Textinput.draw(self) end
 end
 
 function Textinput:bind(key, action)
@@ -404,6 +373,7 @@ end
 
 function Textinput:textinput(text)
     if not self.selected then return end
+    if self.text_max_length and #self.string >= self.text_max_length then return end
     self:deleteSelected()
     table.insert(self.string, self.index, text)
     self.index = self.index + 1
@@ -464,6 +434,15 @@ function Textinput:join(table)
         else string = string .. c end
     end
     return string
+end
+
+function Textinput:setText(text)
+    for i = 1, #text do 
+        if self.text_max_length and #self.string >= self.text_max_length then return end
+        self:deleteSelected()
+        table.insert(self.string, self.index, text:utf8sub(i, i))
+        self.index = self.index + 1
+    end
 end
 
 return setmetatable({new = new}, {__call = function(_, ...) return Textinput.new(...) end})

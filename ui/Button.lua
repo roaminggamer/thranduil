@@ -97,54 +97,12 @@ function Button:update(dt, parent)
     self.previous_pressed = self.pressed
     self.previous_released = self.released
     self.previous_selected = self.selected
+
+    self.input:update(dt)
 end
 
-function Button:draw(parent)
-    love.graphics.setColor(32, 32, 32)
-    love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-
-    if self.hot then
-        love.graphics.setColor(48, 48, 48)
-        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-    end
-
-    if self.selected then
-        love.graphics.setColor(48, 48, 64)
-        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-    end
-
-    if self.down then
-        love.graphics.setColor(16, 16, 16)
-        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
-    end
-end
-
-function Button:keypressed(key)
-    self.input:keypressed(key)
-end
-
-function Button:keyreleased(key)
-    self.input:keyreleased(key)
-end
-
-function Button:mousepressed(button)
-    self.input:mousepressed(button)
-end
-
-function Button:mousereleased(button)
-    self.input:mousereleased(button)
-end
-
-function Button:gamepadpressed(joystick, button)
-    self.input:gamepadpressed(joystick, button)   
-end
-
-function Button:gamepadreleased(joystick, button)
-    self.input:gamepadreleased(joystick, button)
-end
-
-function Button:gamepadaxis(joystick, axis, value)
-    self.input:gamepadaxis(joystick, axis, value)
+function Button:draw()
+    if self.theme then self.theme.Button.draw(self) end
 end
 
 function Button:bind(key, action)
