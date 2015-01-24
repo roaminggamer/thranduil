@@ -14,7 +14,7 @@ UI = require 'UI'
 
 After that, register the UI module to most of LÖVE's callbacks, like this:
 
-```ruby
+```lua
 function love.update(dt)
   -- add your stuff here!!!
   -- UI's update call must come after everything
