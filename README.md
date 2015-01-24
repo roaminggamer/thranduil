@@ -6,21 +6,15 @@ leaving the user (you) with the job of specifying only how those elements will b
 
 ## Usage
 
-The [module]() should be dropped on your project and required like so:
+Require the [module]()
 
 ```lua
 UI = require 'UI'
 ```
 
-After that, register the UI module to most of LÖVE's callbacks, like this:
+Register it to most of LÖVE's callbacks
 
 ```lua
-function love.update(dt)
-  -- add your stuff here!!!
-  -- UI's update call must come after everything
-  UI.update(dt)
-end
-
 function love.keypressed(key)
   UI.keypressed(key)
 end
@@ -54,21 +48,15 @@ function love.textinput(text)
 end
 ```
 
-## Table of Contents
-
-* [Introduction](#introduction)
-* [Elements](#elements)
-  * [Board](#board)
-
 ## Introduction
 
-For this example we'll create a button object at position (10, 10) with width/height (90, 90):
+For this example we'll create a button object at position (10, 10) with width/height (90, 90)
 
 ```lua
 button = UI.Button(10, 10, 90, 90)
 ```
 
-This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined. To do that:
+This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined.
 
 ```lua
 button.draw = function(self)
