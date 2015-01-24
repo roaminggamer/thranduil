@@ -56,7 +56,9 @@ For this example we'll create a button object at position `(10, 10)` with width/
 button = UI.Button(10, 10, 90, 90)
 ```
 
-This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined. The user of this library is then tasked with defining the button's draw function and using its attributes to change how the button looks. For convenience a few [themes](#themes) were created, though.
+This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined.
+
+The user of this library is then tasked with defining the button's draw function and using its attributes to change how the button looks. (for convenience a few [themes](#themes) were created, though)
 
 ```lua
 button.draw = function(self)
