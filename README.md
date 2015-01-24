@@ -55,9 +55,9 @@ For this example we'll create a button object at position `(10, 10)` with width/
 button = UI.Button(10, 10, 90, 90)
 ```
 
-This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined.
+This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Drawing however is handled by you (unless you use a [theme](#themes)), which means that the button's draw function has to be defined. 
 
-And so because of that the button's draw function should be defined manually. This function will use the object's attributes to change how it looks under different states. The UI module is designed in this so that you can have absolute control over how each UI element looks, which means that integration with a game (which usually needs random UI elements in the most unexpected places) is as easy as making any other game object work. 
+This function will use the object's attributes to change how it looks under different states. The UI module is designed in this way so that you can have absolute control over how each UI element looks, which means that integration with a game (which usually needs random UI elements in the most unexpected places) is as straightforward as working with any other game object.
 
 ```lua
 button.draw = function(self)
