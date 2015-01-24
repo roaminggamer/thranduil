@@ -48,7 +48,7 @@ function love.textinput(text)
 end
 ```
 
-## Introduction
+## Creating an element
 
 For this example we'll create a button object at position `(10, 10)` with width/height `(90, 90)`:
 
@@ -58,7 +58,7 @@ button = UI.Button(10, 10, 90, 90)
 
 This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined.
 
-The user of this library is then tasked with defining the button's draw function and using its attributes to change how the button looks. (for convenience a few [themes](#themes) were created, though)
+You are then tasked with defining the button's draw function and using its attributes to change how the button looks under different states. This is so that you can have absolute control over how each UI element looks, which means that integration with a game (which usually needs random UI elements in the most unexpected places) is as easy as making any other game object work. However, if you need to just get something out quickly, a few [themes](#themes) have been created.
 
 ```lua
 button.draw = function(self)
