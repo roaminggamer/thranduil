@@ -6,13 +6,13 @@ leaving the user (you) with the job of specifying only how those elements will b
 
 ## Usage
 
-Require the [module]()
+Require the [module]():
 
 ```lua
 UI = require 'UI'
 ```
 
-Register it to most of LÖVE's callbacks
+And register it to most of LÖVE's callbacks:
 
 ```lua
 function love.keypressed(key)
@@ -50,13 +50,13 @@ end
 
 ## Introduction
 
-For this example we'll create a button object at position (10, 10) with width/height (90, 90)
+For this example we'll create a button object at position `(10, 10)` with width/height `(90, 90)`:
 
 ```lua
 button = UI.Button(10, 10, 90, 90)
 ```
 
-This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined.
+This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined. The user of this library is then tasked with defining the button's draw function and using its attributes to change how the button looks. For convenience a few [themes](#themes) were created, though.
 
 ```lua
 button.draw = function(self)
@@ -69,7 +69,3 @@ button.draw = function(self)
   love.graphics.setColor(255, 255, 255)
 end
 ```
-
-Define the button's draw function and use its attributes to change how the button looks. All UI elements created with this module need to have their draw functions specified explicitly because this module's job only deals with handling an UI element's logic. For user convenience a few [themes](#themes) were created to test things out though.
-
----
