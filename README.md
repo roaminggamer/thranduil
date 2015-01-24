@@ -1,8 +1,7 @@
 # Thranduil
 
-A UI module for LÖVE. Facilitates the creation of game specific UI through UI elements that have all 
-their logic abstracted away (anything having to do with input, if this element has been pressed, is focused, etc), 
-leaving the user (you) with the job of specifying only how those elements will be drawn.
+An UI module for LÖVE. Facilitates the creation of game specific UI through UI elements that have all 
+their logic abstracted away (anything having to do with input and the element's state), leaving the user (you) with the job of specifying only how those elements will be drawn (or if you want you can just use a [theme](#themes)).
 
 ## Usage
 
@@ -48,7 +47,7 @@ function love.textinput(text)
 end
 ```
 
-## Creating an element
+## Introduction
 
 For this example we'll create a button object at position `(10, 10)` with width/height `(90, 90)`:
 
@@ -58,7 +57,7 @@ button = UI.Button(10, 10, 90, 90)
 
 This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined.
 
-You are then tasked with defining the button's draw function and using its attributes to change how the button looks under different states. This is so that you can have absolute control over how each UI element looks, which means that integration with a game (which usually needs random UI elements in the most unexpected places) is as easy as making any other game object work. However, if you need to just get something out quickly, a few [themes](#themes) have been created.
+And so because of that the button's draw function should be defined manually. This function will use the object's attributes to change how it looks under different states. The UI module is designed in this so that you can have absolute control over how each UI element looks, which means that integration with a game (which usually needs random UI elements in the most unexpected places) is as easy as making any other game object work. 
 
 ```lua
 button.draw = function(self)
