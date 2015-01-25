@@ -128,11 +128,11 @@ button = UI.Button(0, 0, 100, 100)
 
 | Action | Default Key | Description |
 | :----- | :---------- | :---------- |
-| left-click | mouse1 | Mouse click |
-| key-enter | return | When selected, the key pressed to press the button |
+| left-click | mouse1 | mouse click |
+| key-enter | return | when selected, the key pressed to press the button |
 
 ```lua
--- Makes the button press with the keyboard be activated through space instead of enter
+-- makes the button press with the keyboard be activated through space instead of enter
 button:bind(' ', 'key-enter')
 ```
 
@@ -152,5 +152,11 @@ button = nil
 ---
 
 ### Frame
+
+<p align="center">
+  <img src="https://github.com/adonaac/thranduil/blob/master/images/frame.png?raw=true" alt="button"/>
+</p>
+
+A frame is a container/panel/window that can contain other UI elements. It can be resized, dragged, closed, have elements added to it and those elements can be selected sequentially with a key (TAB for instance).
 
 ### Textinput
