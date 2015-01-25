@@ -75,6 +75,82 @@ end
 
 ### Button
 
+<p align="center">
+  <img src="https://github.com/adonaac/thranduil/blob/master/images/button.png?raw=true" alt="button"/>
+</p>
+
+A button is a rectangle that can be pressed.
+
+#### Attributes
+
+| Attribute | Description |
+| :-------- | :---------- |
+| x, y | the button's top-left position |
+| w, h | the button's width and height |
+| hot | true if the mouse is over this button (inside its x, y, w, h rectangle) |
+| selected | true if the button is currently selected (with a TAB key for instance when inside a [Frame](#frame)) |
+| pressed | true on the frame the button was pressed |
+| down | true when the button is being held down after being pressed |
+| released | true on the frame the button was released |
+| enter | true on the frame the mouse enters this button's area |
+| exit | true on the frame the mouse exits this button's area |
+
+```lua
+function init()
+  button = UI.Button(0, 0, 100, 100)
+end
+
+function update(dt)
+  button:update(dt)
+  if button.pressed then print('button was pressed!') end
+  if button.released then print('button was released!') end
+  if button.down then print('button is down!') end
+  if button.hot then print('button is hot!') end
+  if button.enter then print('button entered hot!') end
+  if button.exit then print('button exit hot!') end
+  if button.selected then print('button is selected!') end
+end
+```
+
+#### Methods
+
+---
+
+**`new(x, y, w, h, settings):`** creates a new button. The settings table is optional, see [Extensions](#extensions).
+
+```lua
+button = UI.Button(0, 0, 100, 100)
+```
+
+---
+
+**`bind(key, action):`** binds a key to a button action. Current actions are:
+
+| Action | Default Key | Description |
+| :----- | :---------- | :---------- |
+| left-click | mouse1 | Mouse click |
+| key-enter | return | When selected, the key pressed to press the button |
+
+```lua
+-- Makes the button press with the keyboard be activated through space instead of enter
+button:bind(' ', 'key-enter')
+```
+
+---
+
+**`destroy():`** destroys the element. Nilling a UI element won't remove it from memory because the UI module also keeps a reference of each object created with it.
+
+```lua
+-- won't remove the button object from memory
+button = nil
+
+-- removes the button object from memory
+button:destroy()
+button = nil
+```
+
+---
+
 ### Frame
 
 ### Textinput
