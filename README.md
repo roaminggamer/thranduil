@@ -1,8 +1,7 @@
 # Thranduil
 
-A UI module for LÖVE. Facilitates the creation of game specific UI through UI elements that have all 
-their logic abstracted away (anything having to do with input, if this element has been pressed, is focused, etc), 
-leaving the user (you) with the job of specifying only how those elements will be drawn.
+An UI module for LÖVE. Facilitates the creation of game specific UI through UI elements that have all 
+their logic abstracted away (anything having to do with input and the element's state), leaving the user (you) with the job of specifying only how those elements will be drawn (or if you want you can just use a [theme](#themes)).
 
 ## Usage
 
@@ -56,9 +55,9 @@ For this example we'll create a button object at position `(10, 10)` with width/
 button = UI.Button(10, 10, 90, 90)
 ```
 
-This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Calling `button:draw()` won't do anything because by default all UI elements don't have a draw function defined.
+This object can then be updated via `button:update(dt)` and it will automatically have its attributes changed as the user hovers, selects or presses it. Drawing however is handled by you (unless you use a [theme](#themes)), which means that the button's draw function has to be defined. 
 
-The user of this library is then tasked with defining the button's draw function and using its attributes to change how the button looks. (for convenience a few [themes](#themes) were created, though)
+This function will use the object's attributes to change how it looks under different states. The UI module is designed in this way so that you can have absolute control over how each UI element looks, which means that integration with a game (which usually needs random UI elements in the most unexpected places) is as straightforward as working with any other game object.
 
 ```lua
 button.draw = function(self)
@@ -71,3 +70,11 @@ button.draw = function(self)
   love.graphics.setColor(255, 255, 255)
 end
 ```
+
+## Elements
+
+### Button
+
+### Frame
+
+### Textinput
