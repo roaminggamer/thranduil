@@ -116,7 +116,7 @@ end
 
 ---
 
-`new(x, y, w, h, settings):` creates a new button. The settings table is optional, see [Extensions](#extensions).
+**`new(x, y, w, h, settings):`** creates a new button. The settings table is optional, see [Extensions](#extensions).
 
 ```lua
 button = UI.Button(0, 0, 100, 100)
@@ -124,7 +124,7 @@ button = UI.Button(0, 0, 100, 100)
 
 ---
 
-`bind(key, action):` binds a key to a button action. Current actions are:
+**`bind(key, action):`** binds a key to a button action. Current actions are:
 
 | Action | Default Key | Description |
 | :----- | :---------- | :---------- |
@@ -138,7 +138,7 @@ button:bind(' ', 'key-enter')
 
 ---
 
-`destroy():` destroys the element. Nilling a UI element won't remove it from memory because the UI module also keeps a reference of each object created with it.
+**`destroy():`** destroys the element. Nilling a UI element won't remove it from memory because the UI module also keeps a reference of each object created with it.
 
 ```lua
 -- won't remove the button object from memory
