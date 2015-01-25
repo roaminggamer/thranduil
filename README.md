@@ -81,7 +81,7 @@ end
 
 A button is a rectangle that can be pressed.
 
-#### Attributes
+#### Base attributes
 
 | Attribute | Description |
 | :-------- | :---------- |
@@ -94,6 +94,8 @@ A button is a rectangle that can be pressed.
 | released | true on the frame the button was released |
 | enter | true on the frame the mouse enters this button's area |
 | exit | true on the frame the mouse exits this button's area |
+| selected_enter | true on the frame the button enters selection |
+| selected_exit | true on the frame the button exists selection |
 
 ```lua
 function init()
@@ -109,6 +111,8 @@ function update(dt)
   if button.enter then print('button entered hot!') end
   if button.exit then print('button exit hot!') end
   if button.selected then print('button is selected!') end
+  if button.selected_enter then print('button entered selection!') end
+  if button.selected_exit then print('button exited selection!') end
 end
 ```
 
@@ -151,6 +155,8 @@ button = nil
 
 ---
 
+#### Basic button drawing
+
 ### Frame
 
 <p align="center">
@@ -158,5 +164,66 @@ button = nil
 </p>
 
 A frame is a container/panel/window that can contain other UI elements. It can be resized, dragged, closed, have elements added to it and those elements can be selected sequentially with a key (TAB for instance).
+
+#### Base attributes
+
+| Attribute | Description |
+| :-------- | :---------- |
+| x, y | the frame's top-left position |
+| w, h | the frame's width and height |
+| hot | true if the mouse is over this frame (inside its x, y, w, h rectangle) |
+| selected | true if the frame is currently selected (if the TAB key has been pressed for instance) |
+| down | true when the frame is being held down after being pressed |
+| enter | true on the frame the mouse enters this button's area |
+| exit | true on the frame the mouse exits this button's area |
+| selected_enter | true on the frame the button enters selection |
+| selected_exit | true on the frame the button exists selection |
+
+#### Close attributes
+
+* If the `closeable` attribute is not set, then the close button logic for this frame won't happen. 
+* If `closed` is set to true then the frame won't update nor be drawn. 
+* Default values are set if the attribute is omitted on the settings table on this frame's creation.
+
+| Attribute | Description | Default Value |
+| :-------- | :---------- | :------------ |
+| closeable | if this frame can be closed or not | false |
+| closed | if the frame is closed or not | false |
+| closing | if the close button is being held down | |
+| close_margin | top-right margin for close button | 5 |
+| close_button_width | width of the close button | 10 |
+| close_button_height | height of the close button | 10 |
+| close_button | a reference to the close button | |
+
+```lua
+function init()
+  frame = UI.Frame(0, 0, 100, 100, {closeable = true, close_margin = 10, 
+                                    close_button_width = 10, close_button_height = 10})
+end
+
+function update(dt)
+  frame:update(dt)
+  if frame.close_button.pressed then print('close button pressed!') end
+  if frame.closed then print('the frame is closed!') end
+  if not frame.closed then print('the frame is not closed!') end
+  frame.closed = not frame.closed
+end
+```
+
+#### Drag attributes
+
+* If the `draggable` attribute is not set, then the dragging logic for this frame won't happen. 
+* Default values are set if the attribute is omitted on the settings table on this frame's creation.
+
+| Attribute | Description | Default Value |
+| :-------- | :---------- | :------------ |
+| draggable | if this frame can be dragged or not | false |
+| dragging | if this frame is being dragged | |
+| drag_margin | top margin for drag bar | self.h/5 |
+| drag_hot | true if the mouse is over this frame's drag area (inside its x, y, w, h rectangle) | |
+| drag_enter | true on the frame the mouse enters this frame's drag area | |
+| drag_exit | true on the frame the mouse exists this frame's exit area | |
+
+#### Resize attributes
 
 ### Textinput
