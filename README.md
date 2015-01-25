@@ -132,7 +132,7 @@ button = UI.Button(0, 0, 100, 100)
 
 | Action | Default Key | Description |
 | :----- | :---------- | :---------- |
-| left-click | mouse1 | mouse click |
+| left-click | mouse1 | left mouse click |
 | key-enter | return | when selected, the key pressed to press the button |
 
 ```lua
@@ -172,17 +172,20 @@ A frame is a container/panel/window that can contain other UI elements. It can b
 | x, y | the frame's top-left position |
 | w, h | the frame's width and height |
 | hot | true if the mouse is over this frame (inside its x, y, w, h rectangle) |
-| selected | true if the frame is currently selected (if the TAB key has been pressed for instance) |
+| selected | true if the frame is currently selected (if its being interacted with) |
 | down | true when the frame is being held down after being pressed |
 | enter | true on the frame the mouse enters this button's area |
 | exit | true on the frame the mouse exits this button's area |
 | selected_enter | true on the frame the button enters selection |
 | selected_exit | true on the frame the button exists selection |
+| elements | list of elements this frame holds |
+| currently_focused_element | number of the element that is currently selected |
 
 #### Close attributes
 
 * If the `closeable` attribute is not set, then the close button logic for this frame won't happen. 
 * If `closed` is set to true then the frame won't update nor be drawn. 
+* The close button's theme is inherited from the frame by default, but can be changed via `frame.close_button.theme`.
 * Default values are set if the attribute is omitted on the settings table on this frame's creation.
 
 | Attribute | Description | Default Value |
@@ -222,8 +225,101 @@ end
 | drag_margin | top margin for drag bar | self.h/5 |
 | drag_hot | true if the mouse is over this frame's drag area (inside its x, y, w, h rectangle) | |
 | drag_enter | true on the frame the mouse enters this frame's drag area | |
-| drag_exit | true on the frame the mouse exists this frame's exit area | |
+| drag_exit | true on the frame the mouse exits this frame's exit area | |
+
+```lua
+function init()
+  frame = UI.Frame(0, 0, 100, 100, {draggable = true, drag_margin = 20})
+end
+
+function update(dt)
+  frame:update(dt)
+  if frame.dragging then print('frame being dragged!') end
+end
+```
 
 #### Resize attributes
+
+* If the `resizable` attribute is not set, then the resizing logic for this frame won't happen. 
+* Default values are set if the attribute is omitted on the settings table on this frame's creation.
+
+| Attribute | Description | Default Value |
+| :-------- | :---------- | :------------ |
+| resizable | if this frame can be resized or not | false |
+| resizing | if this frame is being resized | |
+| resize_margin | top-left-bottom-right margin for resizing | 6 |
+| resize_hot | true if the mouse is over this frame's resize area | |
+| resize_enter | true on the frame the mouse enters this frame's resize area | |
+| resize_exit | true on the frame the mouse exits this frame's resize area | |
+| min_width | minimum frame width | 20 |
+| min_height | minimum frame height | self.h/5 |
+
+```lua
+function init()
+  frame = UI.Frame(0, 0, 100, 100, {resizable = true, resize_margin = 10, 
+                                    min_width = 100, min_height = 100})
+end
+
+function update(dt)
+  frame:update(dt)
+  if frame.resizing then print('frame being resized!') end
+end
+```
+
+#### Methods
+
+---
+
+**`new(x, y, w, h, settings):`** creates a new frame. The settings table is optional and default values will be used in case some attributes are omitted.
+
+```lua
+button = UI.Frame(0, 0, 100, 100, {draggable = true, resizable = true})
+```
+
+---
+
+**`addElement(element):`** adds an element to the frame. Elements added must be specified with their positions in relation to the frame's top-left position. An `element_id` number is returned which can then be used with the `getElement` function to get a reference to an element inside a frame.
+
+``` lua
+-- the button is draw at position (5, 5) from the frame's top-left corner
+local button_id = frame:addElement(UI.Button(5, 5, 100, 100))
+```
+
+---
+
+**`bind(key, action):`** binds a key to a button action. Current actions are:
+
+| Action | Default Key | Description |
+| :----- | :---------- | :---------- |
+| left-click | mouse1 | left mouse click |
+| close | escape | if `closeable` is true, then this action closes the frame |
+| focus-next | tab | selects the next element (sets its `.selected` attribute to true) |
+| previous-modifier | lshift | modifier to select the previous element with `previous-modifier + focus-next` |
+
+```lua
+-- makes it so that pressing space selects the next element and lshift+space selects the previous
+frame:bind(' ', 'focus-next')
+```
+
+---
+
+**`destroy():`** destroys the frame and all the elements inside it as well. Nilling a UI element won't remove it from memory because the UI module also keeps a reference of each object created with it.
+
+```lua
+-- won't remove the button object from memory
+frame = nil
+
+-- removes the button object from memory
+frame:destroy()
+frame = nil
+```
+
+---
+
+**`getElement(element_id):`** gets a reference to an element from the frame.
+
+```lua
+local button = frame:getElement(button_id)
+```
 
 ### Textinput
