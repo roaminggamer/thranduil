@@ -81,7 +81,7 @@ end
 
 A button is a rectangle that can be pressed.
 
-#### Attributes
+#### Base attributes
 
 | Attribute | Description |
 | :-------- | :---------- |
@@ -94,6 +94,8 @@ A button is a rectangle that can be pressed.
 | released | true on the frame the button was released |
 | enter | true on the frame the mouse enters this button's area |
 | exit | true on the frame the mouse exits this button's area |
+| selected_enter | true on the frame the button enters selection |
+| selected_exit | true on the frame the button exists selection |
 
 ```lua
 function init()
@@ -109,6 +111,8 @@ function update(dt)
   if button.enter then print('button entered hot!') end
   if button.exit then print('button exit hot!') end
   if button.selected then print('button is selected!') end
+  if button.selected_enter then print('button entered selection!') end
+  if button.selected_exit then print('button exited selection!') end
 end
 ```
 
@@ -128,11 +132,11 @@ button = UI.Button(0, 0, 100, 100)
 
 | Action | Default Key | Description |
 | :----- | :---------- | :---------- |
-| left-click | mouse1 | Mouse click |
-| key-enter | return | When selected, the key pressed to press the button |
+| left-click | mouse1 | left mouse click |
+| key-enter | return | when selected, the key pressed to press the button |
 
 ```lua
--- Makes the button press with the keyboard be activated through space instead of enter
+-- makes the button press with the keyboard be activated through space instead of enter
 button:bind(' ', 'key-enter')
 ```
 
@@ -151,6 +155,175 @@ button = nil
 
 ---
 
+#### Basic button drawing
+
 ### Frame
 
+<p align="center">
+  <img src="https://github.com/adonaac/thranduil/blob/master/images/frame.png?raw=true" alt="button"/>
+</p>
+
+A frame is a container/panel/window that can contain other UI elements. It can be resized, dragged, closed, have elements added to it and those elements can be selected sequentially with a key (TAB for instance).
+
+#### Base attributes
+
+| Attribute | Description |
+| :-------- | :---------- |
+| x, y | the frame's top-left position |
+| w, h | the frame's width and height |
+| hot | true if the mouse is over this frame (inside its x, y, w, h rectangle) |
+| selected | true if the frame is currently selected (if its being interacted with) |
+| down | true when the frame is being held down after being pressed |
+| enter | true on the frame the mouse enters this button's area |
+| exit | true on the frame the mouse exits this button's area |
+| selected_enter | true on the frame the button enters selection |
+| selected_exit | true on the frame the button exists selection |
+| elements | list of elements this frame holds |
+| currently_focused_element | number of the element that is currently selected |
+
+#### Close attributes
+
+* If the `closeable` attribute is not set, then the close button logic for this frame won't happen. 
+* If `closed` is set to true then the frame won't update nor be drawn. 
+* The close button's theme is inherited from the frame by default, but can be changed via `frame.close_button.theme`.
+* Default values are set if the attribute is omitted on the settings table on this frame's creation.
+
+| Attribute | Description | Default Value |
+| :-------- | :---------- | :------------ |
+| closeable | if this frame can be closed or not | false |
+| closed | if the frame is closed or not | false |
+| closing | if the close button is being held down | |
+| close_margin | top-right margin for close button | 5 |
+| close_button_width | width of the close button | 10 |
+| close_button_height | height of the close button | 10 |
+| close_button | a reference to the close button | |
+
+```lua
+function init()
+  frame = UI.Frame(0, 0, 100, 100, {closeable = true, close_margin = 10, 
+                                    close_button_width = 10, close_button_height = 10})
+end
+
+function update(dt)
+  frame:update(dt)
+  if frame.close_button.pressed then print('close button pressed!') end
+  if frame.closed then print('the frame is closed!') end
+  if not frame.closed then print('the frame is not closed!') end
+  frame.closed = not frame.closed
+end
+```
+
+#### Drag attributes
+
+* If the `draggable` attribute is not set, then the dragging logic for this frame won't happen. 
+* Default values are set if the attribute is omitted on the settings table on this frame's creation.
+
+| Attribute | Description | Default Value |
+| :-------- | :---------- | :------------ |
+| draggable | if this frame can be dragged or not | false |
+| dragging | if this frame is being dragged | |
+| drag_margin | top margin for drag bar | self.h/5 |
+| drag_hot | true if the mouse is over this frame's drag area (inside its x, y, w, h rectangle) | |
+| drag_enter | true on the frame the mouse enters this frame's drag area | |
+| drag_exit | true on the frame the mouse exits this frame's exit area | |
+
+```lua
+function init()
+  frame = UI.Frame(0, 0, 100, 100, {draggable = true, drag_margin = 20})
+end
+
+function update(dt)
+  frame:update(dt)
+  if frame.dragging then print('frame being dragged!') end
+end
+```
+
+#### Resize attributes
+
+* If the `resizable` attribute is not set, then the resizing logic for this frame won't happen. 
+* Default values are set if the attribute is omitted on the settings table on this frame's creation.
+
+| Attribute | Description | Default Value |
+| :-------- | :---------- | :------------ |
+| resizable | if this frame can be resized or not | false |
+| resizing | if this frame is being resized | |
+| resize_margin | top-left-bottom-right margin for resizing | 6 |
+| resize_hot | true if the mouse is over this frame's resize area | |
+| resize_enter | true on the frame the mouse enters this frame's resize area | |
+| resize_exit | true on the frame the mouse exits this frame's resize area | |
+| min_width | minimum frame width | 20 |
+| min_height | minimum frame height | self.h/5 |
+
+```lua
+function init()
+  frame = UI.Frame(0, 0, 100, 100, {resizable = true, resize_margin = 10, 
+                                    min_width = 100, min_height = 100})
+end
+
+function update(dt)
+  frame:update(dt)
+  if frame.resizing then print('frame being resized!') end
+end
+```
+
+#### Methods
+
+---
+
+**`new(x, y, w, h, settings):`** creates a new frame. The settings table is optional and default values will be used in case some attributes are omitted.
+
+```lua
+button = UI.Frame(0, 0, 100, 100, {draggable = true, resizable = true})
+```
+
+---
+
+**`addElement(element):`** adds an element to the frame. Elements added must be specified with their positions in relation to the frame's top-left position. An `element_id` number is returned which can then be used with the `getElement` function to get a reference to an element inside a frame.
+
+``` lua
+-- the button is draw at position (5, 5) from the frame's top-left corner
+local button_id = frame:addElement(UI.Button(5, 5, 100, 100))
+```
+
+---
+
+**`bind(key, action):`** binds a key to a button action. Current actions are:
+
+| Action | Default Key | Description |
+| :----- | :---------- | :---------- |
+| left-click | mouse1 | left mouse click |
+| close | escape | if `closeable` is true, then this action closes the frame |
+| focus-next | tab | selects the next element (sets its `.selected` attribute to true) |
+| previous-modifier | lshift | modifier to select the previous element with `previous-modifier + focus-next` |
+
+```lua
+-- makes it so that pressing space selects the next element and lshift+space selects the previous
+frame:bind(' ', 'focus-next')
+```
+
+---
+
+**`destroy():`** destroys the frame and all the elements inside it as well. Nilling a UI element won't remove it from memory because the UI module also keeps a reference of each object created with it.
+
+```lua
+-- won't remove the button object from memory
+frame = nil
+
+-- removes the button object from memory
+frame:destroy()
+frame = nil
+```
+
+---
+
+**`getElement(element_id):`** gets a reference to an element from the frame.
+
+```lua
+local button = frame:getElement(button_id)
+```
+
+---
+
 ### Textinput
+
+A textinput is an UI element you can write to. It's a single line of text (not to be confused with a [Textarea](#textarea)) and supports scrolling, copying, deleting, pasting and selecting of text.
