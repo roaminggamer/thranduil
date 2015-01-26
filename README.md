@@ -172,7 +172,32 @@ button = nil
 
 ---
 
+**`press():`** mimicks a button press, setting `pressed` and `released` to true for one frame. Useful when doing automatic UI tests.
+
+```lua
+function update(dt)
+  button:update(dt)
+  -- Automatically presses the button whenever the mouse hovers over it
+  if button.enter then button:press() end
+end
+```
+
+---
+
 #### Basic button drawing
+
+```lua
+button.draw = function(self)
+  love.graphics.setColor(64, 64, 64)
+  if self.hot then love.graphics.setColor(96, 96, 96) end
+  if self.down then love.graphics.setColor(32, 32, 32) end
+  love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+end
+```
+
+<p align="center">
+  <img src="https://github.com/adonaac/thranduil/blob/master/images/button.gif?raw=true" alt="button"/>
+</p>
 
 ### Frame
 
