@@ -1,4 +1,4 @@
-# Thranduil
+# Thranduil - WIP
 
 A UI module for LÖVE. Facilitates the creation of game specific UI through UI elements that have all 
 their logic abstracted away (anything having to do with input and the element's state), leaving the user (you) with the job of specifying only how those elements will be drawn (or if you want you can just use a [theme](#themes)).
