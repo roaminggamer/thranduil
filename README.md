@@ -322,4 +322,8 @@ frame = nil
 local button = frame:getElement(button_id)
 ```
 
+---
+
 ### Textinput
+
+A textinput is an UI element you can write to. It's a single line of text (not to be confused with a [Textarea](#textarea)) and supports scrolling, copying, deleting, pasting and selecting of text.
