@@ -172,7 +172,7 @@ button = nil
 
 ---
 
-**`press():`** mimicks a button press, setting `pressed` and `released` to true for one frame. Useful when doing automatic UI tests.
+**`press():`** mimicks a button press, setting `pressed` and `released` to true for one frame.
 
 ```lua
 function update(dt)
@@ -372,6 +372,14 @@ frame = nil
 
 ---
 
+**`focusNext():`** mimicks a `focus-next` action and selects the next element.
+
+---
+
+**`focusPrevious():`** mimicks a `focus-previous` action and selects the previous element.
+
+---
+
 **`getElement(element_id):`** gets a reference to an element from the frame.
 
 ```lua
@@ -379,6 +387,11 @@ local button = frame:getElement(button_id)
 ```
 
 ---
+
+#### Basic frame drawing
+
+
+
 
 ### Textinput
 
