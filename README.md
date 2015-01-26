@@ -172,7 +172,32 @@ button = nil
 
 ---
 
+**`press():`** mimicks a button press, setting `pressed` and `released` to true for one frame.
+
+```lua
+function update(dt)
+  button:update(dt)
+  -- Automatically presses the button whenever the mouse hovers over it
+  if button.enter then button:press() end
+end
+```
+
+---
+
 #### Basic button drawing
+
+```lua
+button.draw = function(self)
+  love.graphics.setColor(64, 64, 64)
+  if self.hot then love.graphics.setColor(96, 96, 96) end
+  if self.down then love.graphics.setColor(32, 32, 32) end
+  love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+end
+```
+
+<p align="center">
+  <img src="https://github.com/adonaac/thranduil/blob/master/images/button.gif?raw=true" alt="button"/>
+</p>
 
 ### Frame
 
@@ -347,6 +372,14 @@ frame = nil
 
 ---
 
+**`focusNext():`** mimicks a `focus-next` action and selects the next element.
+
+---
+
+**`focusPrevious():`** mimicks a `focus-previous` action and selects the previous element.
+
+---
+
 **`getElement(element_id):`** gets a reference to an element from the frame.
 
 ```lua
@@ -354,6 +387,11 @@ local button = frame:getElement(button_id)
 ```
 
 ---
+
+#### Basic frame drawing
+
+
+
 
 ### Textinput
 
