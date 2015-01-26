@@ -1,14 +1,14 @@
-# Thranduil
+# Thranduil - WIP
 
-An UI module for LÖVE. Facilitates the creation of game specific UI through UI elements that have all 
+A UI module for LÖVE. Facilitates the creation of game specific UI through UI elements that have all 
 their logic abstracted away (anything having to do with input and the element's state), leaving the user (you) with the job of specifying only how those elements will be drawn (or if you want you can just use a [theme](#themes)).
 
 ## Usage
 
-Require the [module]():
+Require the [module](https://github.com/adonaac/thranduil/blob/master/ui/UI.lua):
 
 ```lua
-UI = require 'UI'
+UI = require 'ui/UI'
 ```
 
 And register it to most of LÖVE's callbacks:
