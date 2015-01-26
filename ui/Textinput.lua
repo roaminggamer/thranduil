@@ -15,7 +15,6 @@ function Textinput.new(ui, x, y, w, h, settings)
 
     self.input = self.ui.Input()
     self.input:bind('mouse1', 'left-click')
-    self.input:bind('mouse2', 'right-click')
     self.input:bind('left', 'move-left')
     self.input:bind('right', 'move-right')
     self.input:bind('up', 'first')
@@ -45,7 +44,6 @@ function Textinput.new(ui, x, y, w, h, settings)
     self.select_index = nil
 
     self.pressed_time = 0
-    self.mouse_selecting = false
     self.mouse_all_selected = false
     self.mouse_pressed_time = false
     self.last_mouse_pressed_time = false
@@ -58,6 +56,8 @@ function Textinput.new(ui, x, y, w, h, settings)
     self.text_ix, self.text_iy = self.text_x, self.text_y
     self.text_base_x, self.text_base_y = self.text_x, self.text_y
     self.text_add_x = 0
+    self.selection_position = {x = 0, y = 0}
+    self.selection_size = {w = 0, h = 0}
 
     self.previous_hot = false
     self.previous_selected = false
@@ -91,8 +91,6 @@ function Textinput:update(dt, parent)
     if self.hot and self.input:pressed('left-click') then
         self.selected = true
     elseif not self.hot and self.input:pressed('left-click') then
-        self.selected = false
-    elseif not self.hot and self.input:pressed('right-click') then
         self.selected = false
     end
 

@@ -2,21 +2,23 @@ UI = require 'ui/UI'
 
 function love.load()
     love.window.setMode(800, 600, {display = 1})
-    frame = UI.Frame(0, 0, 100, 100, {closeable = true, draggable = true, resizable = true})
-    frame:addElement(UI.Button(5, 25, 70, 30))
-    frame:addElement(UI.Button(5, 60, 70, 30))
+    love.graphics.setBackgroundColor(255, 255, 255)
 
-    textinput = UI.Textinput(100, 100, 500, 46)
+    button = UI.Button(50, 50, 100, 50)
+    button.draw = function(self)
+        love.graphics.setColor(64, 64, 64)
+        if self.hot then love.graphics.setColor(96, 96, 96) end
+        if self.down then love.graphics.setColor(32, 32, 32) end
+        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+    end
 end
 
 function love.update(dt)
-    frame:update(dt)
-    textinput:update(dt)
+    button:update(dt)
 end
 
 function love.draw()
-    frame:draw()
-    textinput:draw()
+    button:draw()
 end
 
 function love.keypressed(key)

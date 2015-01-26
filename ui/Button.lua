@@ -24,10 +24,24 @@ function Button.new(ui, x, y, w, h, settings)
     self.released = false -- true on the frame it has been released
     self.enter = false -- true on the frame the mouse has entered the frame
     self.exit = false -- true on the frame the mouse has exited the frame
+    self.selected_enter = false -- true on the frame the button was selected
+    self.selected_exit = false -- true on the frame the button was unselected
 
     self.pressing = false
     self.previous_hot = false
     self.previous_selected = false
+
+    -- Initialize extensions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Button and extension.Button.new then
+            extension.Button.new(self)
+        end
+    end
+
+    -- Initialize theme
+    if self.theme and self.theme.Button and self.theme.Button.new then
+        self.theme.Button.new(self)
+    end
 
     return setmetatable(self, Button)
 end
@@ -89,6 +103,18 @@ function Button:update(dt, parent)
         self.down = false
     end
 
+    -- Update extensions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Button and extension.Button.update then
+            extension.Button.update(self, dt, parent)
+        end
+    end
+
+    -- Update theme
+    if self.theme and self.theme.Button and self.theme.Button.update then
+        self.theme.Button.update(self, dt, parent)
+    end
+
     if self.pressed and self.previous_pressed then self.pressed = false end
     if self.released and self.previous_released then self.released = false end
 
@@ -102,7 +128,17 @@ function Button:update(dt, parent)
 end
 
 function Button:draw()
-    if self.theme then self.theme.Button.draw(self) end
+    -- Draw extensions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Button and extension.Button.draw then
+            extension.Button.draw(self)
+        end
+    end
+
+    -- Draw theme
+    if self.theme and self.theme.Button and self.theme.Button.draw then 
+        self.theme.Button.draw(self) 
+    end
 end
 
 function Button:bind(key, action)
@@ -111,6 +147,11 @@ end
 
 function Button:destroy()
     self.ui.removeFromElementsList(self.id)
+end
+
+function Button:press()
+    self.pressed = true
+    self.released = true
 end
 
 return setmetatable({new = new}, {__call = function(_, ...) return Button.new(...) end})
