@@ -437,7 +437,7 @@ function Textinput:selectRight()
     if self.select_index > #self.string + 1 then self.select_index = #self.string + 1 end
 end
 
-function Texinput:selectAll()
+function Textinput:selectAll()
     self.index = 1
     self.select_index = #self.string + 1
 end
