@@ -47,6 +47,29 @@ function love.textinput(text)
 end
 ```
 
+## Table of Contents
+
+* [Introduction](#introduction)
+* [Elements](#elements)
+  * [Button](#button)
+    * [Base attributes](#base-attributes-1)
+    * [Methods](#methods-1)
+    * [Basic button drawing](#basic-button-drawing)
+  * [Frame](#frame)
+    * [Base attributes](#base-attributes-2)
+    * [Close attributes](#close-attributes)
+    * [Drag attributes](#drag-attributes)
+    * [Resize attributes](#resize-attributes)
+    * [Methods](#methods-2)
+    * [Basic frame drawing](#basic-frame-drawing)
+  * [Textinput](#textinput)
+    * [Base attributes](#base-attributes-3)
+    * [Text attributes](text-attributes)
+    * [Methods](#methods-3)
+    * [Basic textinput drawing](#basic-textinput-drawing)
+* [Extensions](#extensions)
+* [Themes](#themes)
+
 ## Introduction
 
 For this example we'll create a button object at position `(10, 10)` with width/height `(90, 90)`:
