@@ -5,11 +5,15 @@ their logic abstracted away (anything having to do with input and the element's 
 
 ## Usage
 
-Require the [module](https://github.com/adonaac/thranduil/blob/master/ui/UI.lua):
+Require the module:
 
 ```lua
-UI = require 'ui/UI'
+UI = require 'ui'
 ```
+
+Replace it with the path where Thranduil is located.
+
+
 
 And register it to most of LÖVE's callbacks:
 
