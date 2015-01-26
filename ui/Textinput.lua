@@ -232,148 +232,84 @@ function Textinput:update(dt, parent)
     -- Move cursor left
     if not self.input:down('lshift') and self.input:pressed('move-left') then
         self.pressed_time = love.timer.getTime()
-        self.index = self.index - 1
-        self.select_index = nil
-        if self.index < 1 then self.index = 1 end
+        self:moveLeft()
         -- print(self:join(), 'LEFT')
     end
     if not self.input:down('lshift') and self.input:down('move-left') then
         local d = love.timer.getTime() - self.pressed_time
-        if d > 0.2 then 
-            self.index = self.index - 1
-            self.select_index = nil
-            if self.index < 1 then self.index = 1 end
-            -- print(self:join(), 'LEFT')
-        end
+        if d > 0.2 then self:moveLeft() end
     end
 
     -- Move cursor right
     if not self.input:down('lshift') and self.input:pressed('move-right') then
         self.pressed_time = love.timer.getTime()
-        self.index = self.index + 1
-        self.select_index = nil
-        if self.index > #self.string + 1 then self.index = #self.string + 1 end
+        self:moveRight()
         -- print(self:join(), 'RIGHT')
     end
     if not self.input:down('lshift') and self.input:down('move-right') then
         local d = love.timer.getTime() - self.pressed_time
-        if d > 0.2 then 
-            self.index = self.index + 1
-            self.select_index = nil
-            if self.index > #self.string + 1 then self.index = #self.string + 1 end
-            -- print(self:join(), 'RIGHT')
-        end
+        if d > 0.2 then self:moveRight() end
+        -- print(self:join(), 'RIGHT')
     end
 
     -- Move cursor to beginning
-    if self.input:pressed('first') then
-        self.index = 1
-        self.select_index = nil
-    end
+    if self.input:pressed('first') then self:first() end
 
     -- Move cursor to end
-    if self.input:pressed('last') then
-        self.index = #self.string + 1
-        self.select_index = nil
-    end
+    if self.input:pressed('last') then self:last() end
 
-    -- Select right
+    -- Select left
     if self.input:down('lshift') and self.input:pressed('move-left') then
         self.pressed_time = love.timer.getTime()
-        if not self.select_index then self.select_index = self.index - 1 
-        else self.select_index = self.select_index - 1 end
-        if self.select_index < 1 then self.select_index = 1 end
+        self:selectLeft()
         -- print(self:join(), 'SHIFT + LEFT')
     end
     if self.input:down('lshift') and self.input:down('move-left') then
         local d = love.timer.getTime() - self.pressed_time
-        if d > 0.2 then 
-            if not self.select_index then self.select_index = self.index - 1 
-            else self.select_index = self.select_index - 1 end
-            if self.select_index < 1 then self.select_index = 1 end
-            -- print(self:join(), 'SHIFT + LEFT')
-        end
+        if d > 0.2 then self:selectLeft() end
+        -- print(self:join(), 'SHIFT + LEFT')
     end
 
-    -- Select left
+    -- Select right 
     if self.input:down('lshift') and self.input:pressed('move-right') then
         self.pressed_time = love.timer.getTime()
-        if not self.select_index then self.select_index = self.index + 1
-        else self.select_index = self.select_index + 1 end
-        if self.select_index > #self.string + 1 then self.select_index = #self.string + 1 end
+        self:selectRight()
         -- print(self:join(), 'SHIFT + RIGHT')
     end
     if self.input:down('lshift') and self.input:down('move-right') then
         local d = love.timer.getTime() - self.pressed_time
-        if d > 0.2 then 
-            if not self.select_index then self.select_index = self.index + 1
-            else self.select_index = self.select_index + 1 end
-            if self.select_index > #self.string + 1 then self.select_index = #self.string + 1 end
-            -- print(self:join(), 'SHIFT + RIGHT')
-        end
+        if d > 0.2 then self:selectRight() end
+        -- print(self:join(), 'SHIFT + RIGHT')
     end
 
     -- Select all
     if self.input:down('lctrl') and self.input:pressed('all') then
-        self.index = 1
-        self.select_index = #self.string + 1
+        self:selectAll()
         -- print(self:join(), 'CTRL + A')
     end
 
     -- Delete before cursor
     if self.input:pressed('backspace') then
         self.pressed_time = love.timer.getTime()
-        if self.select_index then
-            self:deleteSelected()
-        else
-            table.remove(self.string, self.index - 1)
-            self.index = self.index - 1
-            if self.index < 1 then self.index = 1 end
-        end
+        self:backspace()
         -- print(self:join(), 'BACKSPACE')
     end
     if self.input:down('backspace') then
         local d = love.timer.getTime() - self.pressed_time
-        if d > 0.2 then 
-            if self.select_index then
-                self:deleteSelected()
-            else
-                table.remove(self.string, self.index - 1)
-                self.index = self.index - 1
-                if self.index < 1 then self.index = 1 end
-            end
-            -- print(self:join(), 'BACKSPACE')
-        end
+        if d > 0.2 then self:backspace() end
+        -- print(self:join(), 'BACKSPACE')
     end
 
     -- Delete after cursor
     if self.input:pressed('delete') then
         self.pressed_time = love.timer.getTime()
-        if self.select_index then
-            self:deleteSelected()
-        else
-            if self.index == #self.string + 1 then
-                table.remove(self.string, self.index - 1)
-                self.index = self.index - 1
-                if self.index < 1 then self.index = 1 end
-            else table.remove(self.string, self.index) end
-        end
+        self:delete()
         -- print(self:join(), 'DELETE')
     end
     if self.input:down('delete') then
         local d = love.timer.getTime() - self.pressed_time
-        if d > 0.2 then 
-            if self.select_index then
-                self:deleteSelected()
-            else
-                if self.index == #self.string + 1 then
-                    table.remove(self.string, self.index - 1)
-                    self.index = self.index - 1
-                    if self.index < 1 then self.index = 1 end
-                else table.remove(self.string, self.index) end
-            end
-            -- print(self:join(), 'DELETE')
-        end
+        if d > 0.2 then self:delete() end
+        -- print(self:join(), 'DELETE')
     end
 
     if self.input:down('lctrl') and self.input:pressed('copy') then self:copySelected() end
@@ -478,39 +414,64 @@ function Textinput:setText(text)
 end
 
 function Textinput:moveLeft()
-    
+    self.index = self.index - 1
+    self.select_index = nil
+    if self.index < 1 then self.index = 1 end
 end
 
 function Textinput:moveRight()
-    
+    self.index = self.index + 1
+    self.select_index = nil
+    if self.index > #self.string + 1 then self.index = #self.string + 1 end
 end
 
 function Textinput:selectLeft()
-    
+    if not self.select_index then self.select_index = self.index - 1 
+    else self.select_index = self.select_index - 1 end
+    if self.select_index < 1 then self.select_index = 1 end
 end
 
 function Textinput:selectRight()
-    
+    if not self.select_index then self.select_index = self.index + 1
+    else self.select_index = self.select_index + 1 end
+    if self.select_index > #self.string + 1 then self.select_index = #self.string + 1 end
 end
 
 function Texinput:selectAll()
-    
+    self.index = 1
+    self.select_index = #self.string + 1
 end
 
 function Textinput:first()
-    
+    self.index = 1
+    self.select_index = nil
 end
 
 function Textinput:last()
-    
+    self.index = #self.string + 1
+    self.select_index = nil
 end
 
 function Textinput:backspace()
-    
+    if self.select_index then
+        self:deleteSelected()
+    else
+        table.remove(self.string, self.index - 1)
+        self.index = self.index - 1
+        if self.index < 1 then self.index = 1 end
+    end
 end
 
 function Textinput:delete()
-    
+    if self.select_index then
+        self:deleteSelected()
+    else
+        if self.index == #self.string + 1 then
+            table.remove(self.string, self.index - 1)
+            self.index = self.index - 1
+            if self.index < 1 then self.index = 1 end
+        else table.remove(self.string, self.index) end
+    end
 end
 
 return setmetatable({new = new}, {__call = function(_, ...) return Textinput.new(...) end})
