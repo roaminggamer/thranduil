@@ -6,6 +6,7 @@ function Button.new(ui, x, y, w, h, settings)
 
     self.ui = ui
     self.id = self.ui.addToElementsList(self)
+    self.type = 'Button'
 
     self.ix, self.iy = x, y
     self.x, self.y = x, y
@@ -48,7 +49,13 @@ end
 
 function Button:update(dt, parent)
     local x, y = love.mouse.getPosition()
-    if parent then self.x, self.y = parent.x + self.ix, parent.y + self.iy end
+    if parent then 
+        if parent.type == 'Frame' then
+            self.ix = parent.w - parent.close_margin - parent.close_button_width
+            self.iy = parent.close_margin
+        end
+        self.x, self.y = parent.x + self.ix, parent.y + self.iy 
+    end
 
     -- Check for hot
     if x >= self.x and x <= self.x + self.w and y >= self.y and y <= self.y + self.h then

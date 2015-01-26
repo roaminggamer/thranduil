@@ -6,6 +6,7 @@ function Frame.new(ui, x, y, w, h, settings)
 
     self.ui = ui
     self.id = self.ui.addToElementsList(self)
+    self.type = 'Frame'
 
     self.x, self.y = x, y
     self.w, self.h = w, h
@@ -20,11 +21,11 @@ function Frame.new(ui, x, y, w, h, settings)
 
     self.hot = false -- true if the mouse is over the object (inside its x, y, w, h rectangle)
     self.selected = false -- true if currently selected with TAB (for instance) so it can be pressed with a key
-    self.selected_enter = false
-    self.selected_exit = false
     self.down = false -- true if currently being pressed
     self.enter = false -- true on the frame the mouse has entered the frame
     self.exit = false -- true on the frame the mouse has exited the frame
+    self.selected_enter = false -- true on the frame the button was selected
+    self.selected_exit = false -- true on the frame the button was unselected
 
     self.closeable = settings.closeable or false
     self.closing = false
@@ -37,6 +38,8 @@ function Frame.new(ui, x, y, w, h, settings)
 
     self.draggable = settings.draggable or false
     self.drag_hot = false
+    self.drag_enter = false
+    self.drag_exit = false
     self.dragging = false
     self.drag_margin = settings.drag_margin or self.h/5
 
@@ -53,6 +56,19 @@ function Frame.new(ui, x, y, w, h, settings)
     self.previous_mouse_position = nil
     self.previous_hot = false
     self.previous_selected = false
+    self.previous_drag_hot = false
+
+    -- Initialize extesions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Frame and extension.Frame.new then
+            extension.Frame.new(self)
+        end
+    end
+
+    -- Initialize theme
+    if self.theme and self.theme.Frame and self.theme.Frame.new then
+        self.theme.Frame.new(self)
+    end
 
     return setmetatable(self, Frame)
 end
@@ -94,15 +110,21 @@ function Frame:update(dt)
         self.selected_exit = true
     else self.selected_exit = false end
 
-    if self.closeable then 
-        self.close_button:update(dt, self) 
-    end
-
     if self.draggable then
         -- Check for drag_hot
         if self.hot and x >= self.x and x <= self.x + self.w and y >= self.y and y <= self.y + self.drag_margin then
             self.drag_hot = true
         else self.drag_hot = false end
+
+        -- Check for drag_enter
+        if self.drag_hot and not self.previous_drag_hot then
+            self.drag_enter = true
+        else self.drag_enter = false end
+
+        -- Check for drag_exit
+        if not self.drag_hot and self.previous_drag_hot then
+            self.drag_exit = true
+        else self.drag_exit = false end
     end
 
     if self.resizable then
@@ -153,50 +175,8 @@ function Frame:update(dt)
     end
 
     -- Focus on elements
-    if self.currently_focused_element and not self.input:down('previous-modifier') and self.input:pressed('focus-next') then
-        for i, element in ipairs(self.elements) do 
-            if element.selected then self.currently_focused_element = i end
-            element.selected = false 
-        end
-        self.currently_focused_element = self.currently_focused_element + 1
-        if self.currently_focused_element > #self.elements then
-            self.currently_focused_element = 1
-        end
-    end
-    if not self.currently_focused_element and not self.input:down('previous-modifier') and self.input:pressed('focus-next') then
-        for i, element in ipairs(self.elements) do 
-            if element.selected then self.currently_focused_element = i end
-            element.selected = false 
-        end
-        if self.currently_focused_element then
-            self.currently_focused_element = self.currently_focused_element + 1
-            if self.currently_focused_element > #self.elements then
-                self.currently_focused_element = 1
-            end
-        else self.currently_focused_element = 1 end
-    end
-    if self.currently_focused_element and self.input:down('previous-modifier') and self.input:pressed('focus-next') then
-        for i, element in ipairs(self.elements) do 
-            if element.selected then self.currently_focused_element = i end
-            element.selected = false 
-        end
-        self.currently_focused_element = self.currently_focused_element - 1
-        if self.currently_focused_element < 1 then
-            self.currently_focused_element = #self.elements
-        end
-    end
-    if not self.currently_focused_element and self.input:down('previous-modifier') and self.input:pressed('focus-next') then
-        for i, element in ipairs(self.elements) do 
-            if element.selected then self.currently_focused_element = i end
-            element.selected = false 
-        end
-        if self.currently_focused_element then
-            self.currently_focused_element = self.currently_focused_element - 1
-            if self.currently_focused_element < 1 then
-                self.currently_focused_element = #self.elements
-            end
-        else self.currently_focused_element = #self.elements end
-    end
+    if not self.input:down('previous-modifier') and self.input:pressed('focus-next') then self:focusNext() end
+    if self.input:down('previous-modifier') and self.input:pressed('focus-next') then self:focusPrevious() end
     for i, element in ipairs(self.elements) do
         if not element.selected or not i == self.currently_focused_element then
             element.selected = false
@@ -206,12 +186,29 @@ function Frame:update(dt)
         end
     end
 
+    if self.closeable then 
+        self.close_button:update(dt, self) 
+    end
+
+    -- Update extensions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Frame and extension.Frame.update then
+            extension.Frame.update(self, dt, parent)
+        end
+    end
+
+    -- Update theme
+    if self.theme and self.theme.Frame and self.theme.Frame.update then
+        self.theme.Frame.update(self, dt, parent)
+    end
+
+    for _, element in ipairs(self.elements) do element:update(dt, self) end
+
     -- Set previous frame state
     self.previous_hot = self.hot
     self.previous_selected = self.selected
+    self.previous_drag_hot = self.drag_hot
     self.previous_mouse_position = {x = x, y = y}
-
-    for _, element in ipairs(self.elements) do element:update(dt, self) end
 
     self.input:update(dt)
 end
@@ -219,7 +216,17 @@ end
 function Frame:draw()
     if self.closed then return end
 
-    if self.theme then self.theme.Frame.draw(self) end
+    -- Draw extensions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Frame and extension.Frame.draw then
+            extension.Frame.draw(self)
+        end
+    end
+
+    -- Draw theme
+    if self.theme and self.theme.Frame and self.theme.Frame.draw then 
+        self.theme.Frame.draw(self) 
+    end
 
     if self.closeable then self.close_button:draw() end
     for _, element in ipairs(self.elements) do element:draw() end
@@ -243,6 +250,32 @@ end
 
 function Frame:destroy()
     self.ui.removeFromElementsList(self.id)
+end
+
+function Frame:focusNext()
+    for i, element in ipairs(self.elements) do 
+        if element.selected then self.currently_focused_element = i end
+        element.selected = false 
+    end
+    if self.currently_focused_element then
+        self.currently_focused_element = self.currently_focused_element + 1
+        if self.currently_focused_element > #self.elements then
+            self.currently_focused_element = 1
+        end
+    else self.currently_focused_element = 1 end
+end
+
+function Frame:focusPrevious()
+    for i, element in ipairs(self.elements) do 
+        if element.selected then self.currently_focused_element = i end
+        element.selected = false 
+    end
+    if self.currently_focused_element then
+        self.currently_focused_element = self.currently_focused_element - 1
+        if self.currently_focused_element < 1 then
+            self.currently_focused_element = #self.elements
+        end
+    else self.currently_focused_element = #self.elements end
 end
 
 return setmetatable({new = new}, {__call = function(_, ...) return Frame.new(...) end})
