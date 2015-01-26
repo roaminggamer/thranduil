@@ -498,13 +498,9 @@ function update(dt)
   textinput:update(dt)
   print('text x, y: ', textinput.text_x, textinput.text_y)
   print('cursor index: ', textinput.index)
-  print('cursor character: ', textinput.string[index])
+  print('before cursor character: ', textinput.string[textinput.index-1])
   if textinput.select_index then
-    print('text being selected: ', textinput.text:sub(index, select_index))
-  end
-  if textinput.selection_position then
-    print('selection rectangle: ', textinput.selection_position.x, textinput.selection_position.y,
-                                   textinput.selection_size.w, textinput.selection_size.h)
+    print('text being selected: ', textinput.text:sub(textinput.index, textinput.select_index-1))
   end
 end
 ```
@@ -518,6 +514,10 @@ end
 ```lua
 textinput = UI.Textinput(0, 0, 100, 100, {font = love.graphics.newFont('.ttf', 24)})
 ```
+
+---
+
+**`backspace()`** mimicks a `backspace` action and deletes the character before the cursor.
 
 ---
 
@@ -546,6 +546,22 @@ textinput:bind('m', 'all')
 
 ---
 
+**`copySelected():`** mimicks a `lctrl + copy` action and copies the selected text.
+
+---
+
+**`cutSelected():`** mimicks a `lctrl + cut` action and cuts the selected text.
+
+---
+
+**`delete():`** mimicks a `delete` action and deletes the text after the cursor.
+
+---
+
+**`deleteSelected():`** deletes all selected text.
+
+---
+
 **`destroy():`** destroys the textinput. Nilling a UI element won't remove it from memory because the UI module also keeps a reference of each object created with it.
 
 ```lua
@@ -559,13 +575,84 @@ textinput = nil
 
 ---
 
-**`setText(text):`** sets the textinput's text.
-
-```lua
-textinput:setText('text to be set')
-```
+**`first():`** mimicks a `first` action and moves the cursor to the first character of the text.
 
 ---
+
+**`last():`** mimicks a `last` action and moves the cursor to the last character of the text.
+
+---
+
+**`moveLeft():`** mimicks a `move-left` action and moves the cursor one character to the left.
+
+---
+
+**`moveRight():`** mimicks a `move-right` action and moves the cursor one character to the right.
+
+---
+
+**`pasteCopyBuffer():`** mimicks a `lctrl + paste` action and pastes copied or cut text.
+
+---
+
+**`selectAll():`** mimicks a `lctrl + all` action and selects all characters.
+
+---
+
+**`selectLeft():`** mimicks a `lshift + move-left` action and selects one character to the left.
+
+---
+
+**`selectAll():`** mimicks a `lshift + move-right` action and selects one character to the right.
+
+---
+
+**`setText(text):`** sets the textinput's text.
+
+---
+
+**`textinput(character)`** mimicks a normal key input press and adds a single character to the text.
+
+---
+
+#### Basic textinput drawing
+
+```lua
+textinput.draw = function(self)
+    local font = love.graphics.getFont()
+    love.graphics.setFont(self.font)
+
+    -- Draw textinput background
+    love.graphics.setColor(32, 32, 32)
+    if self.hot then love.graphics.setColor(64, 64, 64) end
+    if self.selected then love.graphics.setColor(48, 48, 48) end
+    love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+
+    -- Set scissor
+    love.graphics.setScissor(self.x, self.y, self.w - self.text_margin, self.h)
+
+    -- Draw text
+    love.graphics.setColor(128, 128, 128)
+    love.graphics.print(self.text, self.text_x, self.text_y)
+
+    -- Draw selection
+    love.graphics.setColor(192, 192, 192, 64)
+    if self.selection_position and self.selected then
+        love.graphics.rectangle('fill', 
+                                self.selection_position.x, self.selection_position.y, 
+                                self.selection_size.w, self.selection_size.h)
+    end
+
+    -- Unset stuff 
+    love.graphics.setScissor()
+    love.graphics.setFont(font)
+    love.graphics.setColor(255, 255, 255, 255)
+end
+```
+
+<p align="center">
+  <img src="https://github.com/adonaac/thranduil/blob/master/images/textinput.gif?raw=true" alt="button"/>
+</p>
 
 ## Extensions
 
