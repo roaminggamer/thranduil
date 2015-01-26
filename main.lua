@@ -52,16 +52,50 @@ function love.load()
         -- Draw elements in the frame
         for _, element in ipairs(self.elements) do element:draw() end
     end
+
+    textinput = UI.Textinput(400, 400, 100, 50)
+    textinput.draw = function(self)
+        local font = love.graphics.getFont()
+        love.graphics.setFont(self.font)
+
+        -- Draw textinput background
+        love.graphics.setColor(32, 32, 32)
+        if self.hot then love.graphics.setColor(64, 64, 64) end
+        if self.selected then love.graphics.setColor(48, 48, 48) end
+        love.graphics.rectangle('fill', self.x, self.y, self.w, self.h)
+
+        -- Set scissor
+        love.graphics.setScissor(self.x, self.y, self.w - self.text_margin, self.h)
+
+        -- Draw text
+        love.graphics.setColor(128, 128, 128)
+        love.graphics.print(self.text, self.text_x, self.text_y)
+
+        -- Draw selection
+        love.graphics.setColor(192, 192, 192, 64)
+        if self.selection_position and self.selected then
+            love.graphics.rectangle('fill', 
+                                    self.selection_position.x, self.selection_position.y, 
+                                    self.selection_size.w, self.selection_size.h)
+        end
+
+        -- Unset stuff 
+        love.graphics.setScissor()
+        love.graphics.setFont(font)
+        love.graphics.setColor(255, 255, 255, 255)
+    end
 end
 
 function love.update(dt)
     button:update(dt)
     frame:update(dt)
+    textinput:update(dt)
 end
 
 function love.draw()
     button:draw()
     frame:draw()
+    textinput:draw()
 end
 
 function love.keypressed(key)

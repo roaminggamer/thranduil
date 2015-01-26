@@ -30,13 +30,13 @@ function Textinput.new(ui, x, y, w, h, settings)
 
     self.hot = false -- true if the mouse is over the object (inside its x, y, w, h rectangle)
     self.selected = false -- true if currently selected with TAB (for instance) so it can be pressed with a key
-    self.selected_enter = false
-    self.selected_exit = false
     self.down = false -- true if currently being pressed
     self.pressed = false -- true on the frame it has been pressed
     self.released = false -- true on the frame it has been released
     self.enter = false -- true on the frame the mouse has entered the frame
     self.exit = false -- true on the frame the mouse has exited the frame
+    self.selected_enter = false -- true on the frame the button was selected
+    self.selected_exit = false -- true on the frame the button was unselected
 
     self.string = {}
     self.copy_buffer = {}
@@ -61,6 +61,18 @@ function Textinput.new(ui, x, y, w, h, settings)
 
     self.previous_hot = false
     self.previous_selected = false
+
+    -- Initialize extesions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Textinput and extension.Textinput.new then
+            extension.Textinput.new(self)
+        end
+    end
+
+    -- Initialize theme
+    if self.theme and self.theme.Textinput and self.theme.Textinput.new then
+        self.theme.Textinput.new(self)
+    end
 
     return setmetatable(self, Textinput)
 end
@@ -195,6 +207,18 @@ function Textinput:update(dt, parent)
     if self.mouse_all_selected then
         self.index = 1
         self.select_index = #self.string + 1
+    end
+
+    -- Update extensions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Textinput and extension.Textinput.update then
+            extension.Textinput.update(self, dt, parent)
+        end
+    end
+
+    -- Update theme
+    if self.theme and self.theme.Textinput and self.theme.Textinput.update then
+        self.theme.Textinput.update(self, dt, parent)
     end
 
     -- Last frame state
@@ -362,7 +386,17 @@ function Textinput:update(dt, parent)
 end
 
 function Textinput:draw(parent)
-    if self.theme then self.theme.Textinput.draw(self) end
+    -- Draw extensions
+    for _, extension in ipairs(self.extensions or {}) do
+        if extension.Textinput and extension.Textinput.draw then
+            extension.Textinput.draw(self)
+        end
+    end
+
+    -- Draw theme
+    if self.theme and self.theme.Textinput and self.theme.Textinput.draw then 
+        self.theme.Textinput.draw(self) 
+    end
 end
 
 function Textinput:bind(key, action)
@@ -441,6 +475,42 @@ function Textinput:setText(text)
         table.insert(self.string, self.index, text:utf8sub(i, i))
         self.index = self.index + 1
     end
+end
+
+function Textinput:moveLeft()
+    
+end
+
+function Textinput:moveRight()
+    
+end
+
+function Textinput:selectLeft()
+    
+end
+
+function Textinput:selectRight()
+    
+end
+
+function Texinput:selectAll()
+    
+end
+
+function Textinput:first()
+    
+end
+
+function Textinput:last()
+    
+end
+
+function Textinput:backspace()
+    
+end
+
+function Textinput:delete()
+    
 end
 
 return setmetatable({new = new}, {__call = function(_, ...) return Textinput.new(...) end})
