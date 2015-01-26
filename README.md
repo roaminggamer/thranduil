@@ -5,10 +5,10 @@ their logic abstracted away (anything having to do with input and the element's 
 
 ## Usage
 
-Require the [module]():
+Require the [module](https://github.com/adonaac/thranduil/blob/master/ui/UI.lua):
 
 ```lua
-UI = require 'UI'
+UI = require 'ui/UI'
 ```
 
 And register it to most of LÖVE's callbacks:
