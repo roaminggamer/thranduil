@@ -435,10 +435,12 @@ textinput = UI.Textinput(0, 0, 100, 100, {font = love.graphics.newFont('.ttf', 2
 | paste | p | pastes the copied or cut text with `lctrl + paste` |
 | all | a | selects all text with `lctrl + all` |
 
-```
+```lua
 -- makes it so that lctrl + m selects all text instead of lctrl + a
 textinput:bind('m', 'all')
 ```
+
+---
 
 **`destroy():`** destroys the textinput. Nilling a UI element won't remove it from memory because the UI module also keeps a reference of each object created with it.
 
