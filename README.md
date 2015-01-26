@@ -383,7 +383,7 @@ end
 | index | textinput's cursor index | |
 | select_index | if text is being selected, textinput's second cursor index, otherwise nil| |
 | string | the text string but represented as a table of characters | |
-| font | the font to be used for this textinput object | currently set LÖVE font |
+| font | the font to be used for this textinput object | currently set font |
 
 ```lua
 function init()
