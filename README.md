@@ -462,3 +462,62 @@ textinput:setText('text to be set')
 ```
 
 ---
+
+## Extensions
+
+All objects can be extended for additional functionality in a number of ways. The simpler one is by adding attributes to its settings table. Say you want to make a button have text:
+
+```lua
+function init()
+  button = UI.Button(0, 0, 100, 100, {text = 'Button'})
+  button.draw = function(self)
+    if button.text then
+      love.graphics.print(button.text, self.x, self.y)
+    end
+  end
+end
+```
+
+In this simple example the `text` attribute is added to the settings table, and since internally all attributes added to the settings table are injected into the object, then on its draw function you can check that same attribute and do whatever you want with it.
+
+The other way of extending objects is through the creation of extension files. Those files should be structured like this:
+
+```lua
+-- suppose this is the file CoolExtension.lua
+local Extension = {}
+
+Extension.Button = {}
+Extension.Button.new = function(self) end
+Extension.Button.update = function(self, dt, parent) end
+Extension.Button.draw = function(self) end
+
+-- repeat for all other UI elements that you want to extend
+
+return Extension
+```
+
+And then to add an extension to an object:
+
+```lua
+SuperCoolExtension = require 'CoolExtension'
+
+function init()
+  button = UI.Button(0, 0, 100, 100, {extensions = {SuperCoolExtension}})
+end
+```
+
+And so the functions defined on the `CoolExtension.lua` file will be injected into that button's constructor, update and draw functions. Multiple extensions can be applied to the same object and they'll be processed sequentially, so care must be taken in case one extensions adds attributes that conflict with another.
+
+## Themes
+
+Themes are just extensions that mostly care about the `draw` function (however they're not limited to that, for instance, if you want to tween colors for transitions on your UI elements you'll probably need to add state to the object's constructor and update it on the update function). To add a theme, assuming it's structured like extensions are supposed to be:
+
+```lua
+SuperCoolTheme = require 'CoolTheme'
+
+function init()
+  button = UI.Button(0, 0, 100, 100, {theme = SuperCoolTheme})
+  -- this also works:
+  -- button = UI.Button(0, 0, 100, 100, {extensions = {SuperCoolTheme}})
+end
+```
