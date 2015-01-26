@@ -107,12 +107,6 @@ function update(dt)
   if button.pressed then print('button was pressed!') end
   if button.released then print('button was released!') end
   if button.down then print('button is down!') end
-  if button.hot then print('button is hot!') end
-  if button.enter then print('button entered hot!') end
-  if button.exit then print('button exit hot!') end
-  if button.selected then print('button is selected!') end
-  if button.selected_enter then print('button entered selection!') end
-  if button.selected_exit then print('button exited selection!') end
 end
 ```
 
@@ -180,6 +174,20 @@ A frame is a container/panel/window that can contain other UI elements. It can b
 | selected_exit | true on the frame the button exists selection |
 | elements | list of elements this frame holds |
 | currently_focused_element | number of the element that is currently selected |
+
+```lua
+function init()
+  frame = UI.Frame(0, 0, 100, 100)
+end
+
+function update(dt)
+  frame:update(dt)
+  if frame.enter then print('Focused element #: ' .. frame.currently_focused_element) end
+  if frame.exit then print('# of elements: ' .. #frame.elements) end
+  if frame.selected then print('frame is being interacted with!') end
+end
+```
+
 
 #### Close attributes
 
@@ -326,4 +334,129 @@ local button = frame:getElement(button_id)
 
 ### Textinput
 
+<p align="center">
+  <img src="https://github.com/adonaac/thranduil/blob/master/images/textinput.png?raw=true" alt="button"/>
+</p>
+
 A textinput is an UI element you can write to. It's a single line of text (not to be confused with a [Textarea](#textarea)) and supports scrolling, copying, deleting, pasting and selecting of text.
+
+#### Base attributes
+
+| Attribute | Description |
+| :-------- | :---------- |
+| x, y | the textinput's top-left position |
+| w, h | the textinput's width and height |
+| hot | true if the mouse is over this textinput (inside its x, y, w, h rectangle) |
+| selected | true if the textinput is currently selected (if its being interacted with or selected with TAB) |
+| pressed | true on the frame the textinput was pressed |
+| down | true when the textinput is being held down after being pressed |
+| released | true on the frame the textinput was released |
+| enter | true on the frame the mouse enters this button's area |
+| exit | true on the frame the mouse exits this button's area |
+| selected_enter | true on the frame the button enters selection |
+| selected_exit | true on the frame the button exists selection |
+
+```lua
+function init()
+  textinput = UI.Textinput(0, 0, 100, 100)
+end
+
+function update(dt)
+  textinput:update(dt)
+  if frame.selected_enter then print('textinput selected!') end
+  if frame.selected_exit then print('textinput unselected!') end
+end
+```
+
+#### Text attributes
+
+* Default values are set if the attribute is omitted on the settings table on this textinput's creation.
+
+| Attribute | Description | Default Value |
+| :-------- | :---------- | :------------ |
+| text | the text as a string | |
+| text_x, text_y | text's top-left position | |
+| text_margin | top-left margin for the text | 5 |
+| text_max_length | maximum number of characters this textinput holds | |
+| selection_position.x, .y | selection's top-left position | |
+| selection_size.w, .h | selection's width and height | |
+| index | textinput's cursor index | |
+| select_index | if text is being selected, textinput's second cursor index, otherwise nil| |
+| string | the text string but represented as a table of characters | |
+| font | the font to be used for this textinput object | currently set LÖVE font |
+
+```lua
+function init()
+  textinput = UI.Textinput(0, 0, 100, 100, {text_margin = 10, text_max_length = 10})
+end
+
+function update(dt)
+  textinput:update(dt)
+  print('text x, y: ', textinput.text_x, textinput.text_y)
+  print('cursor index: ', textinput.index)
+  print('cursor character: ', textinput.string[index])
+  if textinput.select_index then
+    print('text being selected: ', textinput.text:sub(index, select_index))
+  end
+  if textinput.selection_position then
+    print('selection rectangle: ', textinput.selection_position.x, textinput.selection_position.y,
+                                   textinput.selection_size.w, textinput.selection_size.h)
+  end
+end
+```
+
+#### Methods
+
+---
+
+**`new(x, y, w, h, settings):`** creates a new textinput. The settings table is optional and default values will be used in case some attributes are omitted.
+
+```lua
+textinput = UI.Textinput(0, 0, 100, 100, {font = love.graphics.newFont('.ttf', 24)})
+```
+
+---
+
+**`bind(key, action):`** binds a key to a button action. Current actions are:
+
+| Action | Default Key | Description |
+| :----- | :---------- | :---------- |
+| left-click | mouse1 | mouse's left click |
+| move-left | left | moves the cursor to the left once |
+| move-right | right | moves the cursor to the right once |
+| first | up | moves the cursor to the start of the text |
+| last | down | moves the cursor to the end of the text |
+| lshift | lshift | shift modifier |
+| backspace | backspace | deletes before the cursor |
+| delete | delete | deletes after the cursor |
+| lctrl | lctrl | ctrl modifier |
+| cut | x | cuts the selected text with `lctrl + cut` |
+| copy | c | copies the selected text with `lctrl + copy` |
+| paste | p | pastes the copied or cut text with `lctrl + paste` |
+| all | a | selects all text with `lctrl + all` |
+
+```
+-- makes it so that lctrl + m selects all text instead of lctrl + a
+textinput:bind('m', 'all')
+```
+
+**`destroy():`** destroys the textinput. Nilling a UI element won't remove it from memory because the UI module also keeps a reference of each object created with it.
+
+```lua
+-- won't remove the textinput object from memory
+textinput = nil
+
+-- removes the textinput object from memory
+textinput:destroy()
+textinput = nil
+```
+
+---
+
+**`setText(text):`** sets the textinput's text.
+
+```lua
+textinput:setText('text to be set')
+```
+
+---
